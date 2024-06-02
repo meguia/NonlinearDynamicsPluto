@@ -137,13 +137,16 @@ k : $(@bind k_vreed Slider(0.1:0.01:3.0,default=-0.1;show_value=true)) \
 tmax : $(@bind tmax_vreed Slider(10:10:300.0,default=10.0;show_value=true)) 
 """
 
+# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
+3*0.45^2
+
 # ╔═╡ 1dc81c7c-514a-4af0-a3c2-452ee9f71fd3
 begin
 	#esto es para generar la figura del paper
 	k = 0.28
 	μ = 0.8
 	v0 = 0.45
-	tmax = 100
+	tmax = 119
 	sol1 = solve(ODEProblem(vreed!,[-0.1;0],tmax,[0.1 ,k, 0]),alg,saveat=0.1)
 	sol2 = solve(ODEProblem(vreed!,[-0.1;0],tmax,[μ ,k, 0]),alg,saveat=0.1)
 	sol3 = solve(ODEProblem(vreed!,[-0.1;0],tmax,[μ , k, v0]),alg,saveat=0.1)
@@ -157,6 +160,9 @@ begin
 	savefig(plt_all, "fig2.png")
 	plt_all
 end	
+
+# ╔═╡ b36ca100-7566-4ef6-a93c-49a6796e19c1
+knotes
 
 # ╔═╡ 6a233c53-92a5-42b8-a113-77893cb42df0
 begin
@@ -205,7 +211,7 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "18d0ff46db05d5d976e49ead208908d14b280ca7"
 
@@ -447,7 +453,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
@@ -2465,7 +2471,9 @@ version = "1.4.1+1"
 # ╠═a2e4e348-5153-4dc2-8a09-34f87c0199c3
 # ╠═ef00f387-2ef4-4e45-8687-cd5860e17f31
 # ╟─c0af1a99-7acf-4f05-8c98-52c3f898391d
+# ╠═bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
 # ╠═1dc81c7c-514a-4af0-a3c2-452ee9f71fd3
+# ╠═b36ca100-7566-4ef6-a93c-49a6796e19c1
 # ╠═6a233c53-92a5-42b8-a113-77893cb42df0
 # ╟─a0e34f60-e242-43af-87ae-17c9575ad1dc
 # ╟─00000000-0000-0000-0000-000000000001
