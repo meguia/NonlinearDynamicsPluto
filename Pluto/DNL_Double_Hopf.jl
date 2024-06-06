@@ -41,6 +41,20 @@ function dhopf!(du,u,p,t)
 	du[4] = -k2*u[3] + u[4]*(μ2 + σ*u[3]^2 + c12*u[1]^2 + ξ*(u[3]^2+u[4]^2)^2)
 end
 
+# ╔═╡ a56a4201-5b87-46d6-a4fe-768544427ad9
+atan(-0.00021,-0.5)
+
+# ╔═╡ c38d2dea-1da7-4a27-8862-980a3b3f808e
+function condition(u,t, integrator)
+	atan(u[1],u[2]) 
+end
+
+# ╔═╡ 62f275f7-b68d-4d26-950f-4765f9a5ea97
+function affect_neg!(integrator) end
+
+# ╔═╡ f1926569-fefe-4e8a-b8ab-3a2e7cb71a2b
+cb=ContinuousCallback(condition,nothing,affect_neg!)
+
 # ╔═╡ 53b50ba4-a968-4b6c-8496-031b5d72f558
 html"""
 <style>
@@ -86,6 +100,18 @@ begin
 	plot!(p1b,sol1,idxs=(3,4),arrow=true,label="(x2,y2)",xlabel="x",ylabel="y")
 	plot(p1a,p1b,layout=(1,2),size = (900,450),title="Double Hopf")
 end	
+
+# ╔═╡ 64b666bf-6d65-44f8-b494-751736f43fac
+prob = ODEProblem(dhopf!, temp.u[end],30000,[0.35,0.05,0.38*0.16,0.16,-0.2,0.1,0.1,-0.1])
+
+# ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
+sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
+
+# ╔═╡ 833e5677-5272-4e1d-9ee9-df65ba89cc81
+scatter(sc,idxs=(3,4),ms=0.2,label="")
+
+# ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
+scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-1.25,-0.5),ylims=(-1.5,2),zlims=(-1.2,1.2))
 
 # ╔═╡ 32cec679-0d93-4d26-a736-e0e6c1058f89
 begin
@@ -2296,8 +2322,16 @@ version = "1.4.1+1"
 # ╠═cf706025-bd61-4ed8-9183-35db60a4c037
 # ╟─ef53daf7-7d49-4763-8f3c-01aec8a105f1
 # ╠═bdcf36f8-a090-4a8a-a3a3-838defcc5b78
-# ╟─b07e11bc-635f-4ab6-9ec3-b4c89d0347be
+# ╠═a56a4201-5b87-46d6-a4fe-768544427ad9
+# ╠═c38d2dea-1da7-4a27-8862-980a3b3f808e
+# ╠═62f275f7-b68d-4d26-950f-4765f9a5ea97
+# ╠═f1926569-fefe-4e8a-b8ab-3a2e7cb71a2b
+# ╠═64b666bf-6d65-44f8-b494-751736f43fac
+# ╠═9d74f3e2-1629-46ab-b123-99bf939ac0ee
+# ╠═833e5677-5272-4e1d-9ee9-df65ba89cc81
+# ╠═b2dff5a5-3b13-4565-a366-1452401f3562
 # ╟─944a42df-4696-41f1-bc48-da1adaac122b
+# ╠═b07e11bc-635f-4ab6-9ec3-b4c89d0347be
 # ╠═12218925-ce5d-4684-9609-5fc2a8d5ff25
 # ╠═e01862c2-1794-45f8-9139-6c3f79c1be3c
 # ╠═32cec679-0d93-4d26-a736-e0e6c1058f89

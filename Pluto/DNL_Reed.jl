@@ -137,9 +137,6 @@ k : $(@bind k_vreed Slider(0.1:0.01:3.0,default=-0.1;show_value=true)) \
 tmax : $(@bind tmax_vreed Slider(10:10:300.0,default=10.0;show_value=true)) 
 """
 
-# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
-3*0.45^2
-
 # ╔═╡ 1dc81c7c-514a-4af0-a3c2-452ee9f71fd3
 begin
 	#esto es para generar la figura del paper
@@ -160,6 +157,9 @@ begin
 	savefig(plt_all, "fig2.png")
 	plt_all
 end	
+
+# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
+2*pi/sqrt(k)
 
 # ╔═╡ b36ca100-7566-4ef6-a93c-49a6796e19c1
 knotes
@@ -211,7 +211,7 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.3"
 manifest_format = "2.0"
 project_hash = "18d0ff46db05d5d976e49ead208908d14b280ca7"
 
@@ -453,7 +453,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
