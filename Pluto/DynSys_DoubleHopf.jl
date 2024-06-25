@@ -17,23 +17,42 @@ function dhopf(u,p,t)
 	return SVector(dx1,dy1,dx2,dy2)
 end
 
-# ╔═╡ 17779c64-8ab5-43d5-bd69-0dc190763f6f
-p = [0.35,0.05,0.38*0.16,0.16,-0.2,0.1,0.1,-0.1]
-
 # ╔═╡ 99d25fa8-8e58-4253-854d-eeaa877cd8ad
 u0 = [1.0, 0.0, 1.0, 0.0]
 
 # ╔═╡ 4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
-doublehopf = ContinuousDynamicalSystem(dhopf,u0,p)
+begin
+	dc = 0.001
+	dk = 0.002
+	clist = 0.1:dc:1.1
+	klist = dk:dk:2.5
+	λm = zeros(length(clist),length(klist))
+	for (i,ci) in enumerate(clist)
+		for (j,ki) in enumerate(klist) 
+			pt = [0.3,-0.3,0.1,0.1*ki,-0.2,ci,-ci,-0.1]
+			doublehopf = ContinuousDynamicalSystem(dhopf,u0,pt)
+			λ = lyapunov(doublehopf,10000;Ttr=1000)
+			if (λ>0)
+				λm[i,j]=λ
+			end	
+		end
+	end
+end	
 
-# ╔═╡ 39904a0d-ae44-4918-9ebf-fd6864e63171
-X, t = trajectory(doublehopf, 300.0)
+# ╔═╡ 0d31c32d-560d-40d0-856a-99fbb45c54bc
+contourf(klist,clist,λm,lw=0,size=(1400,800),c = :inferno,xlabel="k2/k1",ylabel="c12",title="Lyapunov exponent for μ1=0.3 μ2=-0.3 k1=0.1 σ=-0.2 c21=-c12")
 
-# ╔═╡ 9fdacca0-43fd-49cf-8a6b-28fa974a8015
-plot(X[:,1])
-
-# ╔═╡ f3d167e5-deb9-4e24-abfe-371f8bd87441
-λ = lyapunov(doublehopf,10000)
+# ╔═╡ 68752a8f-b7b2-401a-a765-7dba9d5dc8b9
+html"""
+<style>
+main {
+    max-width: 1000px;
+}
+input[type*="range"] {
+	width: 40%;
+}
+</style>
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2433,11 +2452,9 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╠═abb9c6d0-27a9-11ef-17d3-dd8b592e9407
 # ╠═ed2fb86e-79bf-4a2d-936d-ae81476d1e26
-# ╠═17779c64-8ab5-43d5-bd69-0dc190763f6f
 # ╠═99d25fa8-8e58-4253-854d-eeaa877cd8ad
 # ╠═4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
-# ╠═39904a0d-ae44-4918-9ebf-fd6864e63171
-# ╠═9fdacca0-43fd-49cf-8a6b-28fa974a8015
-# ╠═f3d167e5-deb9-4e24-abfe-371f8bd87441
+# ╠═0d31c32d-560d-40d0-856a-99fbb45c54bc
+# ╟─68752a8f-b7b2-401a-a765-7dba9d5dc8b9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
