@@ -74,9 +74,9 @@ sp = html"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
 md"""
 μ1 : $(@bind μ1 Slider(-1.0:0.01:1.0,default=-0.1;show_value=true)) $sp
 μ2 : $(@bind μ2 Slider(-1.0:0.01:1.0,default=-0.1;show_value=true)) \
-kc : $(@bind kc Slider(0.01:0.01:2.0,default=1.0;show_value=true)) $sp
-c : $(@bind c Slider(0.0:0.01:0.2,default=0.1;show_value=true)) \
-k : $(@bind k2 Slider(0.01:0.01:1.0,default=1.0;show_value=true)) $sp
+k1 : $(@bind k1 Slider(0.01:0.01:2.0,default=1.0;show_value=true)) $sp
+k2 : $(@bind k2 Slider(0.01:0.01:2.0,default=1.0;show_value=true)) \
+c : $(@bind c Slider(0.0:0.01:0.6,default=0.1;show_value=true)) \
 σ $(@bind σs Select([1 => "positive", -1 => "negative"]))  $sp $sp $sp
 Coupling $(@bind cs Select([[1,1] => "coupling ++", [-1,-1] => "coupling --", [1,-1] => "coupling +-"])) \
 tmax : $(@bind tmax2 Slider(100:100:3000.0,default=10.0;show_value=true)) 	
@@ -84,7 +84,6 @@ tmax : $(@bind tmax2 Slider(100:100:3000.0,default=10.0;show_value=true))
 
 # ╔═╡ e01862c2-1794-45f8-9139-6c3f79c1be3c
 begin
-	k1 = kc*k2
 	σ2 = σs*0.2
 	c12 = cs[2]*c
 	c21 = cs[1]*c
@@ -102,16 +101,16 @@ begin
 end	
 
 # ╔═╡ 64b666bf-6d65-44f8-b494-751736f43fac
-prob = ODEProblem(dhopf!, temp.u[end],30000,[0.35,0.05,0.38*0.16,0.16,-0.2,0.1,0.1,-0.1])
+prob = ODEProblem(dhopf!, sol1.u[end],100000,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1])
 
 # ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
 sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
 
-# ╔═╡ 833e5677-5272-4e1d-9ee9-df65ba89cc81
-scatter(sc,idxs=(3,4),ms=0.2,label="")
+# ╔═╡ 13dfaa21-f2ed-418d-a5c6-9417a5970cdf
+scatter(sc,idxs=(3,4),ms=0.1,label="")
 
 # ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
-scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-1.25,-0.5),ylims=(-1.5,2),zlims=(-1.2,1.2))
+scatter(sc,idxs=(2,3,4),ms=0.1,label="")
 
 # ╔═╡ 32cec679-0d93-4d26-a736-e0e6c1058f89
 begin
@@ -149,7 +148,7 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "1e8873ab3796ce58821343537e091f10b82bc1a9"
 
@@ -2328,14 +2327,14 @@ version = "1.4.1+1"
 # ╠═f1926569-fefe-4e8a-b8ab-3a2e7cb71a2b
 # ╠═64b666bf-6d65-44f8-b494-751736f43fac
 # ╠═9d74f3e2-1629-46ab-b123-99bf939ac0ee
-# ╠═833e5677-5272-4e1d-9ee9-df65ba89cc81
+# ╠═13dfaa21-f2ed-418d-a5c6-9417a5970cdf
 # ╠═b2dff5a5-3b13-4565-a366-1452401f3562
-# ╟─944a42df-4696-41f1-bc48-da1adaac122b
+# ╠═944a42df-4696-41f1-bc48-da1adaac122b
 # ╠═b07e11bc-635f-4ab6-9ec3-b4c89d0347be
 # ╠═12218925-ce5d-4684-9609-5fc2a8d5ff25
 # ╠═e01862c2-1794-45f8-9139-6c3f79c1be3c
 # ╠═32cec679-0d93-4d26-a736-e0e6c1058f89
-# ╟─53b50ba4-a968-4b6c-8496-031b5d72f558
-# ╟─c59e2248-b18b-4ea1-a8ea-9b300de44f13
+# ╠═53b50ba4-a968-4b6c-8496-031b5d72f558
+# ╠═c59e2248-b18b-4ea1-a8ea-9b300de44f13
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
