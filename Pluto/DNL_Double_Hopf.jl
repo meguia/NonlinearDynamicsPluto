@@ -55,21 +55,19 @@ function affect_neg!(integrator) end
 # ╔═╡ f1926569-fefe-4e8a-b8ab-3a2e7cb71a2b
 cb=ContinuousCallback(condition,nothing,affect_neg!)
 
-# ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
-# ╠═╡ disabled = true
-#=╠═╡
-sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
-  ╠═╡ =#
-
-# ╔═╡ 13dfaa21-f2ed-418d-a5c6-9417a5970cdf
-#=╠═╡
-scatter(sc,idxs=(3,4),ms=0.1,label="",xlims=(-1.7,1.7),ylims=(-1,1))
-  ╠═╡ =#
-
-# ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
-#=╠═╡
-scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-0.6,0),ylims=(-1.7,1.7),zlims=(-1,1))
-  ╠═╡ =#
+# ╔═╡ a7e7b0f0-a654-4f6f-9f93-80c6321f3285
+begin
+	# genera la figura para el paper
+	temp = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[-0.3,0.3,0.1,0.18,-0.2,0.27,-0.27,-0.1]),alg);
+	sola = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[-0.3,0.3,0.1,0.18,-0.2,0.27,-0.27,-0.1),alg);
+	solb = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[-0.3,0.3,0.1,0.18,-0.2,0.2,-0.27,-0.1),alg);
+	solc = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[-0.3,0.3,0.1,0.18,-0.2,0.25,-0.25,-0.1),alg);
+	p1a = plot(sol1,idxs=(0,1),label="x₁",c=:black)
+	plot!(p1a,sol1,idxs=(0,3),label="x₂",c=:blue,ls=:dot,ylabel="x",margin=5mm)
+	p1b = plot(sol1,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
+	plot!(p1b,sol1,idxs=(3,4),arrow=true,c=:blue,ls=:dot,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
+	plot(p1a,p1b,layout=(1,2),size = (900,450))
+end	
 
 # ╔═╡ 12218925-ce5d-4684-9609-5fc2a8d5ff25
 # ╠═╡ disabled = true
@@ -104,11 +102,11 @@ sp = html"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
 
 # ╔═╡ 944a42df-4696-41f1-bc48-da1adaac122b
 md"""
-μ1 : $(@bind μ1 Slider(-1.0:0.01:1.0,default=-0.1;show_value=true)) $sp
-μ2 : $(@bind μ2 Slider(-1.0:0.01:1.0,default=-0.1;show_value=true)) \
-k1 : $(@bind k1 Slider(0.01:0.01:2.0,default=1.0;show_value=true)) $sp
-k2 : $(@bind k2 Slider(0.01:0.01:2.0,default=1.0;show_value=true)) \
-c : $(@bind c Slider(0.0:0.01:0.6,default=0.1;show_value=true)) \
+μ1 : $(@bind μ1 Slider(-1.0:0.01:1.0,default=-0.3;show_value=true)) $sp
+μ2 : $(@bind μ2 Slider(-1.0:0.01:1.0,default=0.3;show_value=true)) \
+k1 : $(@bind k1 Slider(0.01:0.001:0.2,default=0.1;show_value=true)) $sp
+k2 : $(@bind k2 Slider(0.01:0.001:0.3,default=0.19;show_value=true)) \
+c : $(@bind c Slider(0.0:0.01:1.2,default=0.1;show_value=true)) \
 σ $(@bind σs Select([1 => "positive", -1 => "negative"]))  $sp $sp $sp
 Coupling $(@bind cs Select([[1,1] => "coupling ++", [-1,-1] => "coupling --", [1,-1] => "coupling +-"])) \
 tmax : $(@bind tmax2 Slider(100:100:3000.0,default=10.0;show_value=true)) 	
@@ -117,23 +115,39 @@ tmax : $(@bind tmax2 Slider(100:100:3000.0,default=10.0;show_value=true))
 # ╔═╡ e01862c2-1794-45f8-9139-6c3f79c1be3c
 begin
 	σ2 = σs*0.2
-	c12 = cs[2]*c
-	c21 = cs[1]*c
+	c12 = cs[1]*c
+	c21 = cs[2]*c
 end	
 
 # ╔═╡ b07e11bc-635f-4ab6-9ec3-b4c89d0347be
 begin
-	temp = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1]),alg);
+	temp = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],1500,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1]),alg);
 	sol1 = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1]),alg);
 	p1a = plot(sol1,idxs=(0,1),label="x₁",c=:black)
-	plot!(p1a,sol1,idxs=(0,3),label="x₂",c=:red,ylabel="x",margin=5mm)
-	p1b = plot(sol1,idxs=(1,2),arrow=true,label="(x₁,y₁)")
-	plot!(p1b,sol1,idxs=(3,4),arrow=true,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
+	plot!(p1a,sol1,idxs=(0,3),label="x₂",c=:blue,ls=:dot,ylabel="x",margin=5mm)
+	p1b = plot(sol1,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
+	plot!(p1b,sol1,idxs=(3,4),arrow=true,c=:blue,ls=:dot,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
 	plot(p1a,p1b,layout=(1,2),size = (900,450))
 end	
 
 # ╔═╡ 64b666bf-6d65-44f8-b494-751736f43fac
 prob = ODEProblem(dhopf!, sol1.u[end],3000000,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1])
+
+# ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
+# ╠═╡ disabled = true
+#=╠═╡
+sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
+  ╠═╡ =#
+
+# ╔═╡ 13dfaa21-f2ed-418d-a5c6-9417a5970cdf
+#=╠═╡
+scatter(sc,idxs=(3,4),ms=0.1,label="",xlims=(-1.5,1.50),ylims=(-0.2,0.2))
+  ╠═╡ =#
+
+# ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
+#=╠═╡
+scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-0.7,0),ylims=(-1.5,1.50),zlims=(-0.2,0.2))
+  ╠═╡ =#
 
 # ╔═╡ 32cec679-0d93-4d26-a736-e0e6c1058f89
 begin
@@ -2341,8 +2355,9 @@ version = "1.4.1+1"
 # ╠═9d74f3e2-1629-46ab-b123-99bf939ac0ee
 # ╠═13dfaa21-f2ed-418d-a5c6-9417a5970cdf
 # ╠═b2dff5a5-3b13-4565-a366-1452401f3562
-# ╟─944a42df-4696-41f1-bc48-da1adaac122b
+# ╠═944a42df-4696-41f1-bc48-da1adaac122b
 # ╠═b07e11bc-635f-4ab6-9ec3-b4c89d0347be
+# ╠═a7e7b0f0-a654-4f6f-9f93-80c6321f3285
 # ╠═12218925-ce5d-4684-9609-5fc2a8d5ff25
 # ╠═e01862c2-1794-45f8-9139-6c3f79c1be3c
 # ╠═32cec679-0d93-4d26-a736-e0e6c1058f89
