@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 69f343ec-574b-4252-9134-b30bbd74effb
-using PlutoUI, DifferentialEquations, Plots
+using PlutoUI, DifferentialEquations, Plots, Measures
 
 # ╔═╡ cf706025-bd61-4ed8-9183-35db60a4c037
 alg = Tsit5()
@@ -55,6 +55,38 @@ function affect_neg!(integrator) end
 # ╔═╡ f1926569-fefe-4e8a-b8ab-3a2e7cb71a2b
 cb=ContinuousCallback(condition,nothing,affect_neg!)
 
+# ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
+# ╠═╡ disabled = true
+#=╠═╡
+sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
+  ╠═╡ =#
+
+# ╔═╡ 13dfaa21-f2ed-418d-a5c6-9417a5970cdf
+#=╠═╡
+scatter(sc,idxs=(3,4),ms=0.1,label="",xlims=(-1.7,1.7),ylims=(-1,1))
+  ╠═╡ =#
+
+# ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
+#=╠═╡
+scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-0.6,0),ylims=(-1.7,1.7),zlims=(-1,1))
+  ╠═╡ =#
+
+# ╔═╡ 12218925-ce5d-4684-9609-5fc2a8d5ff25
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	m=-0.4:0.01:0.4
+	m1=-0.2:0.01:0
+	ns1 = -σ2*0.01*m1/c+1/16.2*(m1/c).^2
+	ns2 = -σ2*0.01*m1/c+1/18.5*(m1/c).^2
+	plot(m,m*0,c=:black)
+	plot!(m*0,m,c=:black)
+	scatter!([μ2],[μ1])
+	plot!(ns1,m1,c=:red)
+	plot!(m1,ns2,c=:red,size=(600,400),xlims=(-0.4,0.4),ylims=(-0.4,0.4))
+end	
+  ╠═╡ =#
+
 # ╔═╡ 53b50ba4-a968-4b6c-8496-031b5d72f558
 html"""
 <style>
@@ -93,24 +125,15 @@ end
 begin
 	temp = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1]),alg);
 	sol1 = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1]),alg);
-	p1a = plot(sol1,idxs=(0,1),label="x1")
-	plot!(p1a,sol1,idxs=(0,3),label="x2",ylabel="x")
-	p1b = plot(sol1,idxs=(1,2),arrow=true,label="(x1,y1)")
-	plot!(p1b,sol1,idxs=(3,4),arrow=true,label="(x2,y2)",xlabel="x",ylabel="y")
-	plot(p1a,p1b,layout=(1,2),size = (900,450),title="Double Hopf")
+	p1a = plot(sol1,idxs=(0,1),label="x₁",c=:black)
+	plot!(p1a,sol1,idxs=(0,3),label="x₂",c=:red,ylabel="x",margin=5mm)
+	p1b = plot(sol1,idxs=(1,2),arrow=true,label="(x₁,y₁)")
+	plot!(p1b,sol1,idxs=(3,4),arrow=true,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
+	plot(p1a,p1b,layout=(1,2),size = (900,450))
 end	
 
 # ╔═╡ 64b666bf-6d65-44f8-b494-751736f43fac
-prob = ODEProblem(dhopf!, sol1.u[end],100000,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1])
-
-# ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
-sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
-
-# ╔═╡ 13dfaa21-f2ed-418d-a5c6-9417a5970cdf
-scatter(sc,idxs=(3,4),ms=0.1,label="")
-
-# ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
-scatter(sc,idxs=(2,3,4),ms=0.1,label="")
+prob = ODEProblem(dhopf!, sol1.u[end],3000000,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1])
 
 # ╔═╡ 32cec679-0d93-4d26-a736-e0e6c1058f89
 begin
@@ -118,28 +141,17 @@ begin
 	plot!(sol1,idxs=(0,3),size=(1000,300),label="x2")
 end	
 
-# ╔═╡ 12218925-ce5d-4684-9609-5fc2a8d5ff25
-begin
-	m=-0.4:0.01:0.4
-	m1=-0.2:0.01:0
-	ns1 = -σ2*0.01*m1/c+1/16.2*(m1/c).^2
-	ns2 = -σ2*0.01*m1/c+1/18.5*(m1/c).^2
-	plot(m,m*0,c=:black)
-	plot!(m*0,m,c=:black)
-	scatter!([μ2],[μ1])
-	plot!(ns1,m1,c=:red)
-	plot!(m1,ns2,c=:red,size=(600,400),xlims=(-0.4,0.4),ylims=(-0.4,0.4))
-end	
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 DifferentialEquations = "~7.13.0"
+Measures = "~0.3.2"
 Plots = "~1.40.4"
 PlutoUI = "~0.7.59"
 """
@@ -148,9 +160,9 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.3"
 manifest_format = "2.0"
-project_hash = "1e8873ab3796ce58821343537e091f10b82bc1a9"
+project_hash = "593a33f100eb55fc4cf92eac0fecd1c79b24b4ea"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "016833eb52ba2d6bea9fcb50ca295980e728ee24"
@@ -2329,7 +2341,7 @@ version = "1.4.1+1"
 # ╠═9d74f3e2-1629-46ab-b123-99bf939ac0ee
 # ╠═13dfaa21-f2ed-418d-a5c6-9417a5970cdf
 # ╠═b2dff5a5-3b13-4565-a366-1452401f3562
-# ╠═944a42df-4696-41f1-bc48-da1adaac122b
+# ╟─944a42df-4696-41f1-bc48-da1adaac122b
 # ╠═b07e11bc-635f-4ab6-9ec3-b4c89d0347be
 # ╠═12218925-ce5d-4684-9609-5fc2a8d5ff25
 # ╠═e01862c2-1794-45f8-9139-6c3f79c1be3c
