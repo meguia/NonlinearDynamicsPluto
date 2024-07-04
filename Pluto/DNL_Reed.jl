@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 9e372d70-f6af-11ee-10b3-2150e19c755b
-using DifferentialEquations, Plots, PlutoUI, JLD2, GLM, DataFrames
+using DifferentialEquations, Plots, PlutoUI, JLD2, GLM, DataFrames,Measures
 
 # ╔═╡ d380d62a-edd9-4079-a4ee-193b9b2ecaba
 alg = Tsit5()
@@ -147,12 +147,12 @@ begin
 	sol1 = solve(ODEProblem(vreed!,[-0.1;0],tmax,[0.1 ,k, 0]),alg,saveat=0.1)
 	sol2 = solve(ODEProblem(vreed!,[-0.1;0],tmax,[μ ,k, 0]),alg,saveat=0.1)
 	sol3 = solve(ODEProblem(vreed!,[-0.1;0],tmax,[μ , k, v0]),alg,saveat=0.1)
-	plt1a = plot(sol1, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=0.1, v₀=0")
-	plt1b = plot(sol1, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
-	plt2a = plot(sol2, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=$μ, v₀=0")
-	plt2b = plot(sol2, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
-	plt3a = plot(sol3, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=$μ, v₀=$v0")
-	plt3b = plot(sol3, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt1a = plot(sol1, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=0.1, v₀=0",margin=5mm)
+	plt1b = plot(sol1, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=5mm)
+	plt2a = plot(sol2, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=$μ, v₀=0",margin=3mm)
+	plt2b = plot(sol2, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
+	plt3a = plot(sol3, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=$μ, v₀=$v0",margin=3mm)
+	plt3b = plot(sol3, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plt_all = plot(plt1a,plt2a,plt3a,plt1b,plt2b,plt3b,layout=(2,3),size=(1200,700))
 	savefig(plt_all, "fig2.png")
 	plt_all
@@ -167,10 +167,11 @@ knotes
 # ╔═╡ 6a233c53-92a5-42b8-a113-77893cb42df0
 begin
 	ik = findmin(abs.(knotes .- k))[2]
-	fig3 = contourf(v0_v,mu_v,freq_v[ik,:,:]',levels=levels=freq_v[ik,1,1]*2 .^(-12/12:1/12:0),colorbar=false)
-	plot!(fig3,v0_v,3*v0_v.^2,c=:black,lw=3,label="Hopf")
+	fig3 = contourf(v0_v,mu_v,freq_v[ik,:,:]',levels=levels=freq_v[ik,1,1]*2 .^(-12/12:1/12:0))
+	plot!(fig3,v0_v,3*v0_v.^2,c=:black,lw=3,label="Hopf",margin=3mm)
+	plot!(fig3,v0_v,v0_v*0 .- 0.1,fillrange=3*v0_v.^2 .-0.01, c=:white, label = "")
 	scatter!(fig3,[v0],[μ],c=:blue,label="")
-	scatter!(fig3,[0],[μ],c=:blue,label="")
+	scatter!(fig3,[0],[μ],c=:blue,label="",xlims=(-0.005,0.5),ylims=(-0.1,1.5))
 	scatter!(fig3,[0],[0.1],c=:blue,label="",xlabel="v₀",ylabel="μ")
 	savefig(fig3, "fig3.png")
 	fig3
@@ -195,6 +196,7 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
@@ -203,6 +205,7 @@ DataFrames = "~1.6.1"
 DifferentialEquations = "~7.13.0"
 GLM = "~1.9.0"
 JLD2 = "~0.4.48"
+Measures = "~0.3.2"
 Plots = "~1.40.4"
 PlutoUI = "~0.7.59"
 """
@@ -211,9 +214,9 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "18d0ff46db05d5d976e49ead208908d14b280ca7"
+project_hash = "37aae887225908fad6582fc85d4adc42b2a4acbf"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "016833eb52ba2d6bea9fcb50ca295980e728ee24"

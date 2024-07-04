@@ -4,18 +4,8 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 9e372d70-f6af-11ee-10b3-2150e19c755b
-using DifferentialEquations, Plots, PlutoUI, JLD2, GLM, DataFrames, PolynomialRoots
+using DifferentialEquations, Plots, PlutoUI, JLD2, GLM, DataFrames, PolynomialRoots, Measures
 
 # ╔═╡ 6bc1183a-9f68-4f1d-bcf8-37e7ae15fc67
 using Random
@@ -52,25 +42,17 @@ begin
 	end	
 end;	
 
-# ╔═╡ 77ec9c72-454f-4c82-9cb9-fdc97803f31a
-md"""
-x0 $(@bind x0 Slider(-1:0.1:1,default=0.1;show_value=true)) \
-y0 $(@bind y0 Slider(-1:0.1:1,default=0.1;show_value=true)) \
-dμ2 : $(@bind dμ2 Slider(-0.02:0.001:0.02,default=0.02;show_value=true))\
-μ20 : $(@bind μ20 Slider(-0.33:0.001:0.4,default=-0.02;show_value=true)) \
-δ : $(@bind δ Slider(0.0:0.01:2.0,default=0.5;show_value=true)) \
-η : $(@bind η Slider(0.0:0.001:0.1,default=0.0;show_value=true)) \
-tmax $(@bind tmax Slider(30:10:1000,default=100;show_value=true)) \
-"""
+# ╔═╡ 1683800c-db8e-4cb2-8eb4-e9620c462ef0
+
 
 # ╔═╡ e8bd6226-52de-47c3-af77-b672ff7e256f
 begin
-	bt2 = bt(δ)
+	#figura del paper
+	bt2 = bt(0.5)
 	μsn = -0.33:0.01:max(bt2,0.8)
 	μh1 = -0.5:0.01:0
 	μh2 = -0.5:0.01:0.8
-	nhom = argmin(abs.(δ .- dval/10))
-	plta = plot(μsn,sn1.(μsn),c=:black,label="Saddle Node",xlabel="μ2",ylabel="μ1",title="δ=1.5")
+	plta = plot(μsn,sn1.(μsn),c=:black,label="Saddle Node",xlabel="μ2",ylabel="μ1",title="δ=1.5",margin=5mm)
 	plot!(plta,μsn,sn2.(μsn),c=:black,label="")
 	plot!(plta,μh1,μh1*0,c=:black,ls=:dash,label="Hopf")
 	#plot!(plta,μh2,h2.(μh2,δ),c=:black,ls=:dash,label="")
@@ -78,37 +60,53 @@ begin
 	scatter!(plta,[0],[0],c=:gray,ms=3,label="BT")
 	scatter!(plta,[bt2],[sn2(bt2)],c=:gray,ms=3,label="")
 	#scatter!([μ20-dμ2],[sn1(μ20)],c=:blue,label="",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
-	scatter!(plta,[0,-0.3],[-0.15,-0.005],ms=3,c=:blue,label="η=0")
-	scatter!(plta,[0,-0.3],[-0.145,0.005],ms=3,c=:red,label="η=0.02",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
-	pltb = plot(μsn,sn1.(μsn),c=:black,label="Saddle Node",xlabel="μ2",ylabel="μ1",title="δ=0.5")
+	scatter!(plta,[0,-0.3],[-0.15,-0.005],ms=4,c=:blue,label="η=0")
+	scatter!(plta,[0,-0.3],[-0.145,0.005],ms=4,c=:red,label="η=0.02",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
+	pltb = plot(μsn,sn1.(μsn),c=:black,label="Saddle Node",xlabel="μ2",ylabel="μ1",title="δ=0.5",margin=5mm)
 	plot!(pltb,μsn,sn2.(μsn),c=:black,label="")
 	plot!(pltb,μh1,μh1*0,c=:black,ls=:dash,label="Hopf")
-	plot!(pltb,μh2,h2.(μh2,δ),c=:black,ls=:dash,label="")
+	plot!(pltb,μh2,h2.(μh2,0.5),c=:black,ls=:dash,label="")
 	plot!(pltb,hom[5][2,:],hom[5][1,:],c=:black,ls=:dot,label="Homoclinic")
 	scatter!(pltb,[0],[0],c=:gray,ms=3,label="BT")
 	scatter!(pltb,[bt2],[sn2(bt2)],c=:gray,ms=3,label="")
 	#scatter!([μ20-dμ2],[sn1(μ20)],c=:blue,label="",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
-	scatter!(pltb,[0],[-0.11],ms=3,c=:blue,label="η=0")
-	scatter!(pltb,[0],[-0.145],ms=3,c=:red,label="η=0.02",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
+	scatter!(pltb,[0],[-0.11],ms=4,c=:blue,label="η=0")
+	scatter!(pltb,[0],[-0.145],ms=4,c=:red,label="η=0.02",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
 	plt_ab = plot(pltb,plta,layout=(1,2),size=(1200,500))
 	savefig(plt_ab, "fig6.png")
 	plt_ab
 end	
 
+# ╔═╡ 42c91d4f-914f-44c0-ad9e-5aefed0407c9
+begin
+	# guarda figuras para background
+	for nh = 1:13
+		δ = dval[nh]/10
+		plt1 = plot(μsn,sn1.(μsn),c=:blue,label="Saddle Node",xlabel="μ2",ylabel="μ1",margin=5mm)
+		plot!(plt1,μsn,sn2.(μsn),c=:blue,label="")
+		plot!(plt1,μh1,μh1*0,c=:red,label="Hopf")
+		plot!(plt1,μh2,h2.(μh2,δ),c=:red,label="")
+		plot!(plt1,hom[nh][2,:],hom[nh][1,:],c=:black,ls=:dot,label="Homoclinic")
+		scatter!(plt1,[0],[0],c=:gray,ms=3,label="BT",title="δ=$(δ)")
+		scatter!(plt1,[bt2],[sn2(bt2)],c=:gray,ms=3,label="",xlims=(-0.4,0.4),ylims=(-0.3,0.05),size=(600,500))
+		savefig(plt1, "TB_$(nh).png")
+	end
+end
+
 # ╔═╡ 85243d23-6d6f-4175-ab1b-a67d54309c10
 begin
 	# Bogdanov without noise
 	sol1 = solve(SDEProblem(bogdanov!,noise!,[-0.2;0],220,[-0.15,0,1.5,0]),saveat=0.1)
-	plt2a = plot(sol1, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.15, μ2=0, δ=1.5")
-	plt2b = plot(sol1, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt2a = plot(sol1, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.15, μ2=0, δ=1.5",margin=3mm)
+	plt2b = plot(sol1, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	annotate!(plt2b,[0.9],[0],"S",xlims=(-0.9,0.9))
 	sol2 = solve(SDEProblem(bogdanov!,noise!,[-0.2;0],220,[-0.11,0,0.5,0]),saveat=0.1)
-	plt1a = plot(sol2, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.11, μ2=0, δ=0.5")
-	plt1b = plot(sol2, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt1a = plot(sol2, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.11, μ2=0, δ=0.5",margin=5mm)
+	plt1b = plot(sol2, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=5mm)
 	annotate!(plt1b,[0.48],[0],"S",xlims=(-0.6,0.55))
 	sol3 = solve(SDEProblem(bogdanov!,noise!,[-0.2;0],220,[-0.005,-0.3,1.5,0]),saveat=0.1)
-	plt3a = plot(sol3, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.005, μ2=-0.3, δ=1.5")
-	plt3b = plot(sol3, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt3a = plot(sol3, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.005, μ2=-0.3, δ=1.5",margin=3mm)
+	plt3b = plot(sol3, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plt_all = plot(plt1a,plt2a,plt3a,plt1b,plt2b,plt3b,layout=(2,3),size=(1200,700))
 	savefig(plt_all, "fig4.png")
 	plt_all
@@ -119,16 +117,16 @@ begin
 	# Bogdanov with noise
 	Random.seed!(1234)
 	sol4 = solve(SDEProblem(bogdanov!,noise!,[0.7;0],500,[-0.145,0.0,1.5,0.02]),saveat=0.02)
-	plt5a = plot(sol4, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.145, μ2=0, δ=1.5")
-	plt5b = plot(sol4, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt5a = plot(sol4, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.145, μ2=0, δ=1.5",margin=3mm)
+	plt5b = plot(sol4, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plot!(plt5b,[0.7,0.7],[-0.2,-0.02],arrow=true,color=:blue,label="")
 	sol5 = solve(SDEProblem(bogdanov!,noise!,[0.7;0.0],500,[-0.145,0.0,0.5,0.02]),saveat=0.02)
-	plt4a = plot(sol5, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.145, μ2=0, δ=0.5")
-	plt4b = plot(sol5, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt4a = plot(sol5, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.145, μ2=0, δ=0.5",margin=5mm)
+	plt4b = plot(sol5, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=5mm)
 	plot!(plt4b,[0.5,0.5],[-0.2,-0.04],arrow=true,color=:blue,label="")
 	sol6 = solve(SDEProblem(bogdanov!,noise!,[0.2;0],500,[0.005,-0.3,1.5,0.02]),saveat=0.1)
-	plt6a = plot(sol6, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=0.005, μ2=-0.3, δ=1.5")
-	plt6b = plot(sol6, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false)
+	plt6a = plot(sol6, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=0.005, μ2=-0.3, δ=1.5",margin=3mm)
+	plt6b = plot(sol6, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plt_all2 = plot(plt4a,plt5a,plt6a,plt4b,plt5b,plt6b,layout=(2,3),size=(1200,700))
 	savefig(plt_all2, "fig5.png")
 	plt_all2
@@ -153,19 +151,30 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 PolynomialRoots = "3a141323-8675-5d76-9d11-e1df1406c778"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[compat]
+DataFrames = "~1.6.1"
+DifferentialEquations = "~7.13.0"
+GLM = "~1.9.0"
+JLD2 = "~0.4.48"
+Measures = "~0.3.2"
+Plots = "~1.40.4"
+PlutoUI = "~0.7.59"
+PolynomialRoots = "~1.0.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "742e92c766dff1246eeadebd079194841f3c6ed5"
+project_hash = "35555d52fa361f5d95282d9329a3d89bc898f3f9"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "016833eb52ba2d6bea9fcb50ca295980e728ee24"
@@ -2417,8 +2426,9 @@ version = "1.4.1+1"
 # ╠═7ea8fe01-24ff-4fd3-83d7-b05ea831b268
 # ╠═9de8957e-2cab-4f33-a4e8-02932a704022
 # ╠═12d3ffee-818e-4411-8769-eef14bc3be4b
+# ╠═1683800c-db8e-4cb2-8eb4-e9620c462ef0
 # ╠═e8bd6226-52de-47c3-af77-b672ff7e256f
-# ╟─77ec9c72-454f-4c82-9cb9-fdc97803f31a
+# ╠═42c91d4f-914f-44c0-ad9e-5aefed0407c9
 # ╠═85243d23-6d6f-4175-ab1b-a67d54309c10
 # ╠═6bc1183a-9f68-4f1d-bcf8-37e7ae15fc67
 # ╠═7c660bce-d604-4d16-8c19-614fd3db46e9

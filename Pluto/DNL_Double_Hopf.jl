@@ -58,15 +58,28 @@ cb=ContinuousCallback(condition,nothing,affect_neg!)
 # ╔═╡ a7e7b0f0-a654-4f6f-9f93-80c6321f3285
 begin
 	# genera la figura para el paper
-	temp = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[-0.3,0.3,0.1,0.18,-0.2,0.27,-0.27,-0.1]),alg);
-	sola = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[-0.3,0.3,0.1,0.18,-0.2,0.27,-0.27,-0.1),alg);
-	solb = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[-0.3,0.3,0.1,0.18,-0.2,0.2,-0.27,-0.1),alg);
-	solc = solve(ODEProblem(dhopf!, temp.u[end],tmax2,[-0.3,0.3,0.1,0.18,-0.2,0.25,-0.25,-0.1),alg);
-	p1a = plot(sol1,idxs=(0,1),label="x₁",c=:black)
-	plot!(p1a,sol1,idxs=(0,3),label="x₂",c=:blue,ls=:dot,ylabel="x",margin=5mm)
-	p1b = plot(sol1,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
-	plot!(p1b,sol1,idxs=(3,4),arrow=true,c=:blue,ls=:dot,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
-	plot(p1a,p1b,layout=(1,2),size = (900,450))
+	tmax3 = 600
+	temp2a = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[0.3,-0.3,0.1,0.047,-0.2,0.22,-0.22,-0.1]),alg);
+	sola = solve(ODEProblem(dhopf!, temp2a.u[end],1400,[0.3,-0.3,0.1,0.047,-0.2,0.22,-0.22,-0.1]),alg);
+	temp2b = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[0.3,-0.3,0.1,0.18,-0.2,0.4,-0.4,-0.1]),alg);
+	solb = solve(ODEProblem(dhopf!, temp2b.u[end],1400,[0.3,-0.3,0.1,0.18,-0.2,0.4,-0.4,-0.1]),alg);
+	temp2c = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[0.3,-0.3,0.1,0.18,-0.2,0.77,-0.77,-0.1]),alg);
+	solc = solve(ODEProblem(dhopf!, temp2c.u[end],300,[0.3,-0.3,0.1,0.18,-0.2,0.77,-0.77,-0.1]),alg);
+	p2a = plot(sola,idxs=(0,1),label="x₁",c=:black,title="k1=0.1, k2=0.05, c12=0.22")
+	plot!(p2a,sola,idxs=(0,3),label="x₂",c=:blue,ylabel="x",margin=3mm)
+	p3a = plot(sola,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
+	plot!(p3a,sola,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=3mm)
+	p2b = plot(solb,idxs=(0,1),label="x₁",c=:black,title="k1=0.1, k2=0.18, c12=0.4")
+	plot!(p2b,solb,idxs=(0,3),label="x₂",c=:blue,ylabel="x",margin=3mm)
+	p3b = plot(solb,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
+	plot!(p3b,solb,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=3mm)
+	p2c = plot(solc,idxs=(0,1),label="x₁",c=:black,title="k1=0.1, k2=0.18, c12=0.77")
+	plot!(p2c,solc,idxs=(0,3),label="x₂",c=:blue,ylabel="x",margin=5mm)
+	p3c = plot(solc,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
+	plot!(p3c,solc,idxs=(3,4),arrow=true,c=:blue,ls=:dot,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
+	plt_all = plot(p2c,p2a,p2b,p3c,p3a,p3b,layout=(2,3),size = (1200,800))
+	savefig(plt_all, "fig7.png")
+	plt_all
 end	
 
 # ╔═╡ 12218925-ce5d-4684-9609-5fc2a8d5ff25
@@ -89,7 +102,7 @@ end
 html"""
 <style>
 main {
-    max-width: 1000px;
+    max-width: 1200px;
 }
 input[type*="range"] {
 	width: 40%;
@@ -102,8 +115,8 @@ sp = html"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp";
 
 # ╔═╡ 944a42df-4696-41f1-bc48-da1adaac122b
 md"""
-μ1 : $(@bind μ1 Slider(-1.0:0.01:1.0,default=-0.3;show_value=true)) $sp
-μ2 : $(@bind μ2 Slider(-1.0:0.01:1.0,default=0.3;show_value=true)) \
+μ1 : $(@bind μ1 Slider(-1.0:0.01:1.0,default=0.3;show_value=true)) $sp
+μ2 : $(@bind μ2 Slider(-1.0:0.01:1.0,default=-0.3;show_value=true)) \
 k1 : $(@bind k1 Slider(0.01:0.001:0.2,default=0.1;show_value=true)) $sp
 k2 : $(@bind k2 Slider(0.01:0.001:0.3,default=0.19;show_value=true)) \
 c : $(@bind c Slider(0.0:0.01:1.2,default=0.1;show_value=true)) \
@@ -126,7 +139,7 @@ begin
 	p1a = plot(sol1,idxs=(0,1),label="x₁",c=:black)
 	plot!(p1a,sol1,idxs=(0,3),label="x₂",c=:blue,ls=:dot,ylabel="x",margin=5mm)
 	p1b = plot(sol1,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
-	plot!(p1b,sol1,idxs=(3,4),arrow=true,c=:blue,ls=:dot,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
+	plot!(p1b,sol1,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
 	plot(p1a,p1b,layout=(1,2),size = (900,450))
 end	
 
@@ -134,19 +147,15 @@ end
 prob = ODEProblem(dhopf!, sol1.u[end],3000000,[μ1,μ2,k1,k2,σ2,c12,c21,-0.1])
 
 # ╔═╡ 9d74f3e2-1629-46ab-b123-99bf939ac0ee
-# ╠═╡ disabled = true
-#=╠═╡
 sc = solve(prob,alg,callback=cb,save_everystep=false,save_start=false,save_end=false);
-  ╠═╡ =#
 
 # ╔═╡ 13dfaa21-f2ed-418d-a5c6-9417a5970cdf
-#=╠═╡
-scatter(sc,idxs=(3,4),ms=0.1,label="",xlims=(-1.5,1.50),ylims=(-0.2,0.2))
-  ╠═╡ =#
+scatter(sc,idxs=(3,4),ms=0.1,label="",xlims=(-1.5,1.50))
 
 # ╔═╡ b2dff5a5-3b13-4565-a366-1452401f3562
+# ╠═╡ disabled = true
 #=╠═╡
-scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-0.7,0),ylims=(-1.5,1.50),zlims=(-0.2,0.2))
+scatter(sc,idxs=(2,3,4),ms=0.1,label="",xlims=(-0.7,0),ylims=(-1.5,1.50))
   ╠═╡ =#
 
 # ╔═╡ 32cec679-0d93-4d26-a736-e0e6c1058f89
@@ -174,7 +183,7 @@ PlutoUI = "~0.7.59"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "593a33f100eb55fc4cf92eac0fecd1c79b24b4ea"
 
@@ -2355,7 +2364,7 @@ version = "1.4.1+1"
 # ╠═9d74f3e2-1629-46ab-b123-99bf939ac0ee
 # ╠═13dfaa21-f2ed-418d-a5c6-9417a5970cdf
 # ╠═b2dff5a5-3b13-4565-a366-1452401f3562
-# ╠═944a42df-4696-41f1-bc48-da1adaac122b
+# ╟─944a42df-4696-41f1-bc48-da1adaac122b
 # ╠═b07e11bc-635f-4ab6-9ec3-b4c89d0347be
 # ╠═a7e7b0f0-a654-4f6f-9f93-80c6321f3285
 # ╠═12218925-ce5d-4684-9609-5fc2a8d5ff25

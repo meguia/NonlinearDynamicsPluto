@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ abb9c6d0-27a9-11ef-17d3-dd8b592e9407
-using DynamicalSystems, Plots
+using DynamicalSystems, Plots,JLD2, Measures
 
 # ╔═╡ ed2fb86e-79bf-4a2d-936d-ae81476d1e26
 function dhopf(u,p,t)
@@ -20,9 +20,50 @@ end
 # ╔═╡ 99d25fa8-8e58-4253-854d-eeaa877cd8ad
 u0 = [1.0, 0.0, 1.0, 0.0]
 
-# ╔═╡ 4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
+# ╔═╡ ea563d0c-0708-4b64-924f-b23ce0190a2b
+# ╠═╡ disabled = true
+#=╠═╡
+save("lyapunov.jld2","λm",λm,"klist",klist,"clist",clist)
+  ╠═╡ =#
+
+# ╔═╡ 0d31c32d-560d-40d0-856a-99fbb45c54bc
 begin
-	dc = 0.001
+	#plt_all = 
+	plt_all = contourf(klist,clist,λm.> 0,lw=0,size=(1200,700),c = :red,xlabel="k2/k1",ylabel="c12",title="μ1=0.3, μ2=-0.3, k1=0.1, σ=-0.2, c21=-c12",margin=5mm)
+	x1 = [0.47,1.8,1.8]
+	y1 = [0.22,0.4,0.77]
+	#scatter(x1,y1,label="",ms=5,c=:white,xlims=(klist[1],klist[end]),ylims=(clist[1],clist[end]))
+	#annotate!(plt_all,x1, y1, ["B","C","A"], :white)
+	#savefig(plt_all, "fig8.png")
+	plt_all
+end	
+
+# ╔═╡ ca86015f-151a-4a9b-9b16-fe9440425c23
+size(λm[1:10:end,1:10:end])
+
+# ╔═╡ 617caf8a-2c19-4e65-9a45-11e69ec97f9d
+contourf(λm[1:10:end,1:10:end].> 0.001,lw=0,c=:Reds,size=(1200,700))
+
+# ╔═╡ ddf0e4db-22de-40a5-809f-ecb4fed6ebb5
+savefig(plt_all, "Lyapunov.png")
+
+# ╔═╡ 68752a8f-b7b2-401a-a765-7dba9d5dc8b9
+html"""
+<style>
+main {
+    max-width: 1200px;
+}
+input[type*="range"] {
+	width: 40%;
+}
+</style>
+"""
+
+# ╔═╡ 4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	dc = 0.001 
 	dk = 0.002
 	clist = 0.1:dc:1.1
 	klist = dk:dk:2.5
@@ -38,30 +79,28 @@ begin
 		end
 	end
 end	
+  ╠═╡ =#
 
-# ╔═╡ 0d31c32d-560d-40d0-856a-99fbb45c54bc
-contourf(klist,clist,λm,lw=0,size=(1400,800),c = :inferno,xlabel="k2/k1",ylabel="c12",title="Lyapunov exponent for μ1=0.3 μ2=-0.3 k1=0.1 σ=-0.2 c21=-c12")
-
-# ╔═╡ 68752a8f-b7b2-401a-a765-7dba9d5dc8b9
-html"""
-<style>
-main {
-    max-width: 1000px;
-}
-input[type*="range"] {
-	width: 40%;
-}
-</style>
-"""
+# ╔═╡ f4f5c416-d469-44c9-9df1-b63973e87aca
+begin
+	s = load("lyapunov.jld2")
+	λm = s["λm"]
+	klist = s["klist"]
+	clist = s["clist"]
+end	
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DynamicalSystems = "61744808-ddfa-5f27-97ff-6e42cc95d634"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 DynamicalSystems = "~3.3.16"
+JLD2 = "~0.4.48"
+Measures = "~0.3.2"
 Plots = "~1.40.4"
 """
 
@@ -69,9 +108,9 @@ Plots = "~1.40.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "b762b8eac8d584a545d4c552ce43c50d6a54c4ce"
+project_hash = "579aed8e3b615fd011e14ac57763f002aa609b8d"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "fc02d55798c1af91123d07915a990fbb9a10d146"
@@ -693,6 +732,12 @@ git-tree-sha1 = "6344aa18f654196be82e62816935225b3b9abe44"
 uuid = "fa42c844-2597-5d31-933b-ebd51ab2693f"
 version = "0.3.1"
 
+[[deps.FileIO]]
+deps = ["Pkg", "Requires", "UUIDs"]
+git-tree-sha1 = "82d8afa92ecf4b52d78d869f038ebfb881267322"
+uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+version = "1.16.3"
+
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
@@ -935,6 +980,12 @@ version = "1.10.0"
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
+
+[[deps.JLD2]]
+deps = ["FileIO", "MacroTools", "Mmap", "OrderedCollections", "Pkg", "PrecompileTools", "Reexport", "Requires", "TranscodingStreams", "UUIDs", "Unicode"]
+git-tree-sha1 = "bdbe8222d2f5703ad6a7019277d149ec6d78c301"
+uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+version = "0.4.48"
 
 [[deps.JLFzf]]
 deps = ["Pipe", "REPL", "Random", "fzf_jll"]
@@ -2454,7 +2505,12 @@ version = "1.4.1+1"
 # ╠═ed2fb86e-79bf-4a2d-936d-ae81476d1e26
 # ╠═99d25fa8-8e58-4253-854d-eeaa877cd8ad
 # ╠═4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
+# ╠═ea563d0c-0708-4b64-924f-b23ce0190a2b
+# ╠═f4f5c416-d469-44c9-9df1-b63973e87aca
 # ╠═0d31c32d-560d-40d0-856a-99fbb45c54bc
-# ╟─68752a8f-b7b2-401a-a765-7dba9d5dc8b9
+# ╠═ca86015f-151a-4a9b-9b16-fe9440425c23
+# ╠═617caf8a-2c19-4e65-9a45-11e69ec97f9d
+# ╠═ddf0e4db-22de-40a5-809f-ecb4fed6ebb5
+# ╠═68752a8f-b7b2-401a-a765-7dba9d5dc8b9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
