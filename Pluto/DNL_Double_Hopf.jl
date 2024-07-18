@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -59,50 +59,38 @@ cb=ContinuousCallback(condition,nothing,affect_neg!)
 begin
 	# genera la figura para el paper
 	tmax3 = 600
-	temp2a = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[0.3,-0.3,0.1,0.047,-0.2,0.22,-0.22,-0.1]),alg);
-	sola = solve(ODEProblem(dhopf!, temp2a.u[end],1400,[0.3,-0.3,0.1,0.047,-0.2,0.22,-0.22,-0.1]),alg);
-	temp2b = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[0.3,-0.3,0.1,0.18,-0.2,0.4,-0.4,-0.1]),alg);
-	solb = solve(ODEProblem(dhopf!, temp2b.u[end],1400,[0.3,-0.3,0.1,0.18,-0.2,0.4,-0.4,-0.1]),alg);
-	temp2c = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,[0.3,-0.3,0.1,0.18,-0.2,0.77,-0.77,-0.1]),alg);
-	solc = solve(ODEProblem(dhopf!, temp2c.u[end],300,[0.3,-0.3,0.1,0.18,-0.2,0.77,-0.77,-0.1]),alg);
-	p2a = plot(sola,idxs=(0,1),label="x₁",c=:black,title="k1=0.1, k2=0.05, c12=0.22")
+	par1 = [0.3,-0.15,0.1,0.18,-0.2,0.3,-0.3,-0.1]
+	par2 = [0.12,-0.15,0.1,0.18,-0.2,0.3,-0.3,-0.1]
+	par3 = [0.25,-0.15,0.1,0.18,-0.2,0.3,-0.3,-0.1]
+	
+	temp2a = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],400,par1),alg);
+	sola = solve(ODEProblem(dhopf!, temp2a.u[end],300,par1),alg);
+	temp2b = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,par2),alg);
+	solb = solve(ODEProblem(dhopf!, temp2b.u[end],1200,par2),alg);
+	temp2c = solve(ODEProblem(dhopf!, [1.0;0.0;1.0;0.0],500,par3),alg);
+	solc = solve(ODEProblem(dhopf!, temp2c.u[end],1600,par3),alg);
+	p2a = plot(sola,idxs=(0,1),label="x₁",c=:black,title="μ1=0.3, μ2=-0.15")
 	plot!(p2a,sola,idxs=(0,3),label="x₂",c=:blue,ylabel="x",margin=3mm)
 	p3a = plot(sola,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
 	plot!(p3a,sola,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=3mm)
-	p2b = plot(solb,idxs=(0,1),label="x₁",c=:black,title="k1=0.1, k2=0.18, c12=0.4")
+	p2b = plot(solb,idxs=(0,1),label="x₁",c=:black,title="μ1=0.12, μ2=-0.15")
 	plot!(p2b,solb,idxs=(0,3),label="x₂",c=:blue,ylabel="x",margin=3mm)
 	p3b = plot(solb,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
 	plot!(p3b,solb,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=3mm)
-	p2c = plot(solc,idxs=(0,1),label="x₁",c=:black,title="k1=0.1, k2=0.18, c12=0.77")
+	p2c = plot(solc,idxs=(0,1),label="x₁",c=:black,title="μ1=0.25, μ2=-0.15")
 	plot!(p2c,solc,idxs=(0,3),label="x₂",c=:blue,ylabel="x",margin=5mm)
 	p3c = plot(solc,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
-	plot!(p3c,solc,idxs=(3,4),arrow=true,c=:blue,ls=:dot,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
-	plt_all = plot(p2c,p2a,p2b,p3c,p3a,p3b,layout=(2,3),size = (1200,800))
+	plot!(p3c,solc,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
+	plt_all = plot(p2a,p2b,p2c,p3a,p3b,p3c,layout=(2,3),size = (1200,800))
 	savefig(plt_all, "fig7.png")
 	plt_all
 end	
-
-# ╔═╡ 12218925-ce5d-4684-9609-5fc2a8d5ff25
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	m=-0.4:0.01:0.4
-	m1=-0.2:0.01:0
-	ns1 = -σ2*0.01*m1/c+1/16.2*(m1/c).^2
-	ns2 = -σ2*0.01*m1/c+1/18.5*(m1/c).^2
-	plot(m,m*0,c=:black)
-	plot!(m*0,m,c=:black)
-	scatter!([μ2],[μ1])
-	plot!(ns1,m1,c=:red)
-	plot!(m1,ns2,c=:red,size=(600,400),xlims=(-0.4,0.4),ylims=(-0.4,0.4))
-end	
-  ╠═╡ =#
 
 # ╔═╡ 53b50ba4-a968-4b6c-8496-031b5d72f558
 html"""
 <style>
 main {
-    max-width: 1200px;
+    max-width: 1000px;
 }
 input[type*="range"] {
 	width: 40%;
@@ -163,6 +151,22 @@ begin
 	plot(sol1,idxs=(0,1),size=(1000,300),label="x1")
 	plot!(sol1,idxs=(0,3),size=(1000,300),label="x2")
 end	
+
+# ╔═╡ 12218925-ce5d-4684-9609-5fc2a8d5ff25
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	m=-0.4:0.01:0.4
+	m1=-0.2:0.01:0
+	ns1 = -σ2*0.01*m1/c+1/16.2*(m1/c).^2
+	ns2 = -σ2*0.01*m1/c+1/18.5*(m1/c).^2
+	plot(m,m*0,c=:black)
+	plot!(m*0,m,c=:black)
+	scatter!([μ2],[μ1])
+	plot!(ns1,m1,c=:red)
+	plot!(m1,ns2,c=:red,size=(600,400),xlims=(-0.4,0.4),ylims=(-0.4,0.4))
+end	
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """

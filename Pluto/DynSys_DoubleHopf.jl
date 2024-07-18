@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -19,45 +19,6 @@ end
 
 # ╔═╡ 99d25fa8-8e58-4253-854d-eeaa877cd8ad
 u0 = [1.0, 0.0, 1.0, 0.0]
-
-# ╔═╡ ea563d0c-0708-4b64-924f-b23ce0190a2b
-# ╠═╡ disabled = true
-#=╠═╡
-save("lyapunov.jld2","λm",λm,"klist",klist,"clist",clist)
-  ╠═╡ =#
-
-# ╔═╡ 0d31c32d-560d-40d0-856a-99fbb45c54bc
-begin
-	#plt_all = 
-	plt_all = contourf(klist,clist,λm.> 0,lw=0,size=(1200,700),c = :red,xlabel="k2/k1",ylabel="c12",title="μ1=0.3, μ2=-0.3, k1=0.1, σ=-0.2, c21=-c12",margin=5mm)
-	x1 = [0.47,1.8,1.8]
-	y1 = [0.22,0.4,0.77]
-	#scatter(x1,y1,label="",ms=5,c=:white,xlims=(klist[1],klist[end]),ylims=(clist[1],clist[end]))
-	#annotate!(plt_all,x1, y1, ["B","C","A"], :white)
-	#savefig(plt_all, "fig8.png")
-	plt_all
-end	
-
-# ╔═╡ ca86015f-151a-4a9b-9b16-fe9440425c23
-size(λm[1:10:end,1:10:end])
-
-# ╔═╡ 617caf8a-2c19-4e65-9a45-11e69ec97f9d
-contourf(λm[1:10:end,1:10:end].> 0.001,lw=0,c=:Reds,size=(1200,700))
-
-# ╔═╡ ddf0e4db-22de-40a5-809f-ecb4fed6ebb5
-savefig(plt_all, "Lyapunov.png")
-
-# ╔═╡ 68752a8f-b7b2-401a-a765-7dba9d5dc8b9
-html"""
-<style>
-main {
-    max-width: 1200px;
-}
-input[type*="range"] {
-	width: 40%;
-}
-</style>
-"""
 
 # ╔═╡ 4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
 # ╠═╡ disabled = true
@@ -81,12 +42,107 @@ begin
 end	
   ╠═╡ =#
 
+# ╔═╡ ea563d0c-0708-4b64-924f-b23ce0190a2b
+# ╠═╡ disabled = true
+#=╠═╡
+save("lyapunov_spectrum_12.jld2","λs",λs,"μ1list",μ1list2,"μ2list",μ2list2)
+  ╠═╡ =#
+
+# ╔═╡ d1379a79-8493-4a73-95a1-44b32d1671ec
+ls = copy(λs);
+
+# ╔═╡ df72d994-c4e3-4fcb-84ca-c64863743460
+begin
+	s1 = load("ns12.jld2")
+	ns1 = s1["ns1"]
+	ns2 = s1["ns2"]
+end	
+
+# ╔═╡ f2c2bf18-ef3e-4394-b039-a25796f6130f
+for (i1,μ1) in enumerate(μ1list2)
+		for (i2,μ2) in enumerate(μ2list2)
+			if μ2<0
+				μ1_min = ns2[2][findfirst(ns2[1] .< μ2)]
+				if μ1>μ1_min
+					ls[i2,i1,4] = 1
+				end
+			elseif μ2<0.2758
+				μ1_min = ns1[2][findfirst(ns1[1] .> μ2)]
+				if μ1>μ1_min
+					ls[i2,i1,4] = 1
+				end
+			end	
+		end
+end	
+
+# ╔═╡ f127fe39-3287-451a-96b7-52f55787ef47
+ns1[1][end]
+
+# ╔═╡ 89ecac97-478c-4e28-abf8-832f059837b0
+ns2[2][findfirst(ns2[1] .< -0.1)]
+
+# ╔═╡ 0d31c32d-560d-40d0-856a-99fbb45c54bc
+begin
+	#plt_all = 
+	plt_all = contourf(μ2list2,μ1list2,(ls[:,:,4]'.>0)*1+(ls[:,:,2]'.>-1e-3)*2+(ls[:,:,1]'.>1e-3)*3,lw=0,levels=2,c=[:white,:lightblue2,:pink],size=(1200,700),xlabel="μ2",ylabel="μ1",title="k1=0.1, k2=$(k2), σ=-0.2, c12=$(c12), c21=$(c21)",margin=5mm,colorbar=false)
+	plot!(ns1[1],ns1[2],c=:blue,lw=2,label="")
+	plot!(ns2[1],ns2[2],c=:blue,lw=2,label="")
+	plot!([0,0],[-0.4,0.4],c=:black,lw=2,label="")
+	plot!([-0.4,0.4],[0,0],c=:black,lw=2,label="",xlims=(-0.4,0.3),ylims=(-0.1,0.4))
+	savefig(plt_all, "fig8.png")
+	plt_all
+end	
+
+# ╔═╡ ddf0e4db-22de-40a5-809f-ecb4fed6ebb5
+savefig(plt_all, "Lyapunov12.png")
+
+# ╔═╡ 68752a8f-b7b2-401a-a765-7dba9d5dc8b9
+html"""
+<style>
+main {
+    max-width: 1000px;
+}
+input[type*="range"] {
+	width: 40%;
+}
+</style>
+"""
+
+# ╔═╡ 4bb8cffb-881c-4d02-bcac-cae8a4617985
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	c12 = 0.3
+	c21 = -0.3
+	dμ1 = 0.002
+	dμ2 = 0.002
+	k2 = 0.18
+	μ1list2 = 0.0:dμ1:0.4
+	μ2list2 = -0.4:dμ2:0.3
+	λs = zeros(length(μ2list2),length(μ1list2),4)
+	for (i1,μ1) in enumerate(μ1list2)
+		for (i2,μ2) in enumerate(μ2list2) 
+			pt = [μ1,μ2,0.1,k2,-0.2,c12,c21,-0.1]
+			doublehopf = ContinuousDynamicalSystem(dhopf,u0,pt)
+			λs[i2,i1,:] = lyapunovspectrum(doublehopf,10000;Ttr=1000)	
+		end
+	end
+end	
+  ╠═╡ =#
+
 # ╔═╡ f4f5c416-d469-44c9-9df1-b63973e87aca
 begin
-	s = load("lyapunov.jld2")
+	s = load("lyapunov12.jld2")
 	λm = s["λm"]
-	klist = s["klist"]
-	clist = s["clist"]
+	μ1list = s["μ1list"]
+	μ2list = s["μ2list"]
+	s2 = load("lyapunov_spectrum_12.jld2")
+	λs = s2["λs"]
+	μ1list2 = s2["μ1list"]
+	μ2list2 = s2["μ2list"]
+	k2 = 0.18
+	c12 = 0.3
+	c21 = -0.3
 end	
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2504,12 +2560,16 @@ version = "1.4.1+1"
 # ╠═abb9c6d0-27a9-11ef-17d3-dd8b592e9407
 # ╠═ed2fb86e-79bf-4a2d-936d-ae81476d1e26
 # ╠═99d25fa8-8e58-4253-854d-eeaa877cd8ad
+# ╠═4bb8cffb-881c-4d02-bcac-cae8a4617985
 # ╠═4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
 # ╠═ea563d0c-0708-4b64-924f-b23ce0190a2b
 # ╠═f4f5c416-d469-44c9-9df1-b63973e87aca
+# ╠═d1379a79-8493-4a73-95a1-44b32d1671ec
+# ╠═f2c2bf18-ef3e-4394-b039-a25796f6130f
+# ╠═f127fe39-3287-451a-96b7-52f55787ef47
+# ╠═89ecac97-478c-4e28-abf8-832f059837b0
 # ╠═0d31c32d-560d-40d0-856a-99fbb45c54bc
-# ╠═ca86015f-151a-4a9b-9b16-fe9440425c23
-# ╠═617caf8a-2c19-4e65-9a45-11e69ec97f9d
+# ╠═df72d994-c4e3-4fcb-84ca-c64863743460
 # ╠═ddf0e4db-22de-40a5-809f-ecb4fed6ebb5
 # ╠═68752a8f-b7b2-401a-a765-7dba9d5dc8b9
 # ╟─00000000-0000-0000-0000-000000000001
