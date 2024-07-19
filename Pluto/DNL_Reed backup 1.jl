@@ -17,9 +17,6 @@ end
 # ╔═╡ 9e372d70-f6af-11ee-10b3-2150e19c755b
 using DifferentialEquations, Plots, PlutoUI, JLD2, GLM, DataFrames,Measures
 
-# ╔═╡ a7d91c9d-0b91-4502-b97f-0b83791a7cfa
-using DSP
-
 # ╔═╡ d380d62a-edd9-4079-a4ee-193b9b2ecaba
 alg = Tsit5()
 
@@ -140,12 +137,9 @@ k : $(@bind k_vreed Slider(0.1:0.01:3.0,default=-0.1;show_value=true)) \
 tmax : $(@bind tmax_vreed Slider(10:10:300.0,default=10.0;show_value=true)) 
 """
 
-# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
-#=╠═╡
-2*pi/sqrt(k)
-  ╠═╡ =#
-
 # ╔═╡ 1dc81c7c-514a-4af0-a3c2-452ee9f71fd3
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	#esto es para generar la figura del paper
 	k = 0.28
@@ -165,81 +159,30 @@ begin
 	savefig(plt_all, "fig2.png")
 	plt_all
 end	
+  ╠═╡ =#
+
+# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
+#=╠═╡
+2*pi/sqrt(k)
+  ╠═╡ =#
 
 # ╔═╡ b36ca100-7566-4ef6-a93c-49a6796e19c1
-findmin(abs.(knotes .- k))[2]
-
-# ╔═╡ eb35345e-e086-48ee-8874-fa8549f6cf16
-begin
-	mu = 1.5
-	ve0 = 0.5
-	x0 = -ve0/k*(mu-ve0^2)
-	solt = solve(ODEProblem(vreed!,[x0;1e-4],1500,[mu ,k, ve0]),alg,saveat=0.1);
-	y = getindex.(solt.u,2)
-	plot(y)
-	y0 = findfirst(y .> 0.95*maximum(y))
-	w = abs.(hilbert(y))
-	plot!(w)
-	z = filt(digitalfilter(Lowpass(0.005), Butterworth(3)), w)
-	plot!(z)
-	scatter!([y0],[y[y0]])
-end	
-
-# ╔═╡ 2af4f8c2-a47b-4f4b-a71f-455dd71624be
-begin
-	ytiny = 1e-4
-	tend = 2500
-	trans_v = zeros(size(freq_v[2,:,:]))
-	harm_v = zeros(size(freq_v[2,:,:]))
-	for (iv,vi) in enumerate(v0_v)
-		for (iμ,μi) in enumerate(mu_v)
-			x0 = -vi/k*(μi-vi^2)
-			solt = solve(ODEProblem(vreed!,[x0;ytiny],tend,[μi ,k, vi]),alg,saveat=0.1)
-			y = getindex.(solt.u,2)
-			if maximum(y) > 10*ytiny
-				trans_v[iv,iμ] = findfirst(y .> 0.95*maximum(y))
-				harm_v[iv,iμ] = meanfreq(y)
-			end	
-		end
-	end
-end	
-
-# ╔═╡ be3a56f0-7c24-42d7-a5ba-ed95e7479683
-harmc = 10*(harm_v[:,:]./freq_v[2,:,:])
+knotes
 
 # ╔═╡ 6a233c53-92a5-42b8-a113-77893cb42df0
+#=╠═╡
 begin
-	mrkc = :lightblue1
 	ik = findmin(abs.(knotes .- k))[2]
-	f3a = contourf(v0_v,mu_v,freq_v[ik,:,:]',levels=freq_v[ik,1,1]*2 .^(-12/12:1/12:0),title="Frequency")
-	plot!(f3a,v0_v,3*v0_v.^2,c=:black,lw=3,label="Hopf",margin=3mm)
-	plot!(f3a,v0_v,v0_v*0 .- 0.1,fillrange=3*v0_v.^2 .-0.01, c=:white, label = "")
-	scatter!(f3a,[v0,0,0],[μ,μ,0.1],c=mrkc,ms=5,label="",xlims=(-0.005,0.5),ylims=(-0.1,1.5),xlabel="v₀",ylabel="μ")
-	
-
-	f3b = contourf(v0_v,mu_v,ampl_v[ik,:,:]',lw=0,title="Amplitude")
-	plot!(f3b,v0_v,3*v0_v.^2,c=:black,lw=3,label="",margin=3mm)
-	plot!(f3b,v0_v,v0_v*0 .- 0.1,fillrange=3*v0_v.^2 .-0.01, c=:white, label = "")
-	scatter!(f3b,[v0,0,0],[μ,μ,0.1],c=mrkc,ms=5,label="",xlims=(-0.005,0.5),ylims=(-0.1,1.5),xlabel="v₀",ylabel="μ")
-	
-	f3c = contourf(v0_v,mu_v,log10.(trans_v[:,:]') .- 1.0,lw=0,title="Transient Duration (log10)")
-	plot!(f3c,v0_v,3*v0_v.^2,c=:yellow,lw=3,label="",margin=3mm)
-	plot!(f3c,v0_v,v0_v*0 .- 0.1,fillrange=3*v0_v.^2 .-0.01, c=:white, label = "")
-	scatter!(f3c,[v0,0,0],[μ,μ,0.1],c=mrkc,ms=5,label="",xlims=(-0.005,0.5),ylims=(-0.1,1.5),xlabel="v₀",ylabel="μ")
-	
-	f3d = contourf(v0_v,mu_v,harmc',levels=collect(0.9:0.02:1.405),lw=0,title="Harmonic Content")
-	plot!(f3d,v0_v,3*v0_v.^2,c=:black,lw=7,label="",margin=3mm)
-	plot!(f3d,v0_v,v0_v*0 .- 0.1,fillrange=3*v0_v.^2 .-0.01, c=:white, label = "")
-	scatter!(f3d,[v0,0,0],[μ,μ,0.1],c=mrkc,ms=5,label="",xlims=(-0.005,0.5),ylims=(-0.1,1.5),xlabel="v₀",ylabel="μ")
-	annotate!(0, 0,text("A","Times",14,:left,:bottom))
-	
-	fig3 = plot(f3a,f3b,f3c,f3d,layout=(2,2),size=(1200,1000))
+	fig3 = contourf(v0_v,mu_v,freq_v[ik,:,:]',levels=levels=freq_v[ik,1,1]*2 .^(-12/12:1/12:0))
+	plot!(fig3,v0_v,3*v0_v.^2,c=:black,lw=3,label="Hopf",margin=3mm)
+	plot!(fig3,v0_v,v0_v*0 .- 0.1,fillrange=3*v0_v.^2 .-0.01, c=:white, label = "")
+	scatter!(fig3,[v0],[μ],c=:blue,label="")
+	scatter!(fig3,[0],[μ],c=:blue,label="",xlims=(-0.005,0.5),ylims=(-0.1,1.5))
+	scatter!(fig3,[0],[0.1],c=:blue,label="",xlabel="v₀",ylabel="μ")
 	savefig(fig3, "fig3.png")
 	fig3
 end	
-
-# ╔═╡ d64815e8-1706-4df5-9624-f0b583ca6110
-harmc[harmc .< 1.0 ] .= 1.0
+  ╠═╡ =#
 
 # ╔═╡ a0e34f60-e242-43af-87ae-17c9575ad1dc
 html"""
@@ -256,7 +199,6 @@ input[type*="range"] {
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
@@ -266,7 +208,6 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
-DSP = "~0.7.9"
 DataFrames = "~1.6.1"
 DifferentialEquations = "~7.13.0"
 GLM = "~1.9.0"
@@ -282,23 +223,12 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "e0441dd737baab2d28be661f2480aba3c946ce7b"
+project_hash = "37aae887225908fad6582fc85d4adc42b2a4acbf"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "016833eb52ba2d6bea9fcb50ca295980e728ee24"
 uuid = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 version = "0.2.7"
-
-[[deps.AbstractFFTs]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "d92ad398961a3ed262d8bf04a1a2b8340f915fef"
-uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
-version = "1.5.0"
-weakdeps = ["ChainRulesCore", "Test"]
-
-    [deps.AbstractFFTs.extensions]
-    AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
-    AbstractFFTsTestExt = "Test"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -585,12 +515,6 @@ git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
 uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 version = "4.1.1"
 
-[[deps.DSP]]
-deps = ["Compat", "FFTW", "IterTools", "LinearAlgebra", "Polynomials", "Random", "Reexport", "SpecialFunctions", "Statistics"]
-git-tree-sha1 = "f7f4319567fe769debfcf7f8c03d8da1dd4e2fb0"
-uuid = "717857b8-e6f2-59f4-9121-6e50c889abd2"
-version = "0.7.9"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
@@ -800,18 +724,6 @@ deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers",
 git-tree-sha1 = "466d45dc38e15794ec7d5d63ec03d776a9aff36e"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.4+1"
-
-[[deps.FFTW]]
-deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
-git-tree-sha1 = "4820348781ae578893311153d69049a93d05f39d"
-uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.8.0"
-
-[[deps.FFTW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "c6033cc3892d0ef5bb9cd29b7f2f0331ea5184ea"
-uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
-version = "3.3.10+0"
 
 [[deps.FastAlmostBandedMatrices]]
 deps = ["ArrayInterface", "ArrayLayouts", "BandedMatrices", "ConcreteStructs", "LazyArrays", "LinearAlgebra", "MatrixFactorizations", "PrecompileTools", "Reexport"]
@@ -1085,11 +997,6 @@ version = "1.3.0"
 git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
 version = "0.2.2"
-
-[[deps.IterTools]]
-git-tree-sha1 = "42d5f897009e7ff2cf88db414a389e5ed1bdd023"
-uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
-version = "1.10.0"
 
 [[deps.IteratorInterfaceExtensions]]
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
@@ -1673,22 +1580,6 @@ deps = ["BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "Static", "T
 git-tree-sha1 = "240d7170f5ffdb285f9427b92333c3463bf65bf6"
 uuid = "1d0040c9-8b98-4ee7-8388-3f51789ca0ad"
 version = "0.2.1"
-
-[[deps.Polynomials]]
-deps = ["LinearAlgebra", "RecipesBase"]
-git-tree-sha1 = "3aa2bb4982e575acd7583f01531f241af077b163"
-uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
-version = "3.2.13"
-
-    [deps.Polynomials.extensions]
-    PolynomialsChainRulesCoreExt = "ChainRulesCore"
-    PolynomialsMakieCoreExt = "MakieCore"
-    PolynomialsMutableArithmeticsExt = "MutableArithmetics"
-
-    [deps.Polynomials.weakdeps]
-    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-    MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-    MutableArithmetics = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -2594,11 +2485,6 @@ version = "1.4.1+1"
 # ╠═1dc81c7c-514a-4af0-a3c2-452ee9f71fd3
 # ╠═b36ca100-7566-4ef6-a93c-49a6796e19c1
 # ╠═6a233c53-92a5-42b8-a113-77893cb42df0
-# ╠═be3a56f0-7c24-42d7-a5ba-ed95e7479683
-# ╠═d64815e8-1706-4df5-9624-f0b583ca6110
-# ╠═a7d91c9d-0b91-4502-b97f-0b83791a7cfa
-# ╠═eb35345e-e086-48ee-8874-fa8549f6cf16
-# ╠═2af4f8c2-a47b-4f4b-a71f-455dd71624be
-# ╟─a0e34f60-e242-43af-87ae-17c9575ad1dc
+# ╠═a0e34f60-e242-43af-87ae-17c9575ad1dc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

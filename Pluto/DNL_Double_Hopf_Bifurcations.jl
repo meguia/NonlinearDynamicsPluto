@@ -32,7 +32,7 @@ function dhopf(u,p)
 end
 
 # ╔═╡ d9c3004c-3d87-4912-b05f-17130e6e1394
-par_d = (μ1=-0.4,μ2=-0.4,k1=0.1,k2=0.18,σ2=-0.2,c12=0.3,c21=-0.3,ξ=-0.1)
+par_d = (μ1=-0.4,μ2=-0.4,k1=0.1,k2=0.18,σ2=0.2,c12=0.3,c21=-0.1,ξ=-0.1)
 
 # ╔═╡ 84aff82e-42db-486f-8081-8ac718f54a1d
 prob2 = BifurcationProblem(dhopf, [0.1; 0.0; 0.1; 0.0], par_d, (@lens _.μ1),record_from_solution = (x, p) -> x[1]);
@@ -74,10 +74,13 @@ begin
 	plot(hopf_1,branchlabel = "Hopf 1",plotspecialpoints = false,c=:black,ls=:dash)
 	plot!(hopf_1b,vars=(:μ2,:μ1),branchlabel = "Hopf 2",plotspecialpoints = false,c=:black,ls=:dash)
 	scatter!([0],[0],label="Hopf-Hopf",c=:gray)
-	plot!(ns_po1,branchlabel = "NS 1",vars=(:μ2,:μ1),c=:black,ls=:dot,plotspecialpoints = false)
-	plot!(ns_po2,branchlabel = "NS 2",vars=(:μ2,:μ1),c=:blue,ls=:dot,plotspecialpoints = false,ylims=(-0.4,0.4),xlims=(-0.4,0.4))
+	plot!(ns_po1,branchlabel = "NS 1",vars=(:μ2,:μ1),c=:red,ls=:dot,plotspecialpoints = false)
+	plot!(ns_po2,branchlabel = "NS 2",vars=(:μ1,:μ2),c=:red,ls=:dot,plotspecialpoints = false,ylims=(-0.4,0.4),xlims=(-0.4,0.4))
 	scatter!([-0.3],[0.3],label="P2",c=:red,title="k₁=0.1, k₂=$(par_d.k2), σ=$(par_d.σ2), c₁₂=$(par_d.c12), c₂₁=$(par_d.c21) ")
 end	
+
+# ╔═╡ 435f022f-4b2d-4c38-92b9-fee781981482
+ns_po2[end]
 
 # ╔═╡ ea2296cf-470c-47b9-90d0-ae4004fa77cf
 begin
@@ -2537,6 +2540,7 @@ version = "1.4.1+1"
 # ╠═458beebf-9853-4559-8498-7c307cee03d8
 # ╠═e8fdbb00-3b6e-4204-ae37-977b0f182c8e
 # ╠═3812323a-b87d-4ea8-8dee-72f0720b5b53
+# ╠═435f022f-4b2d-4c38-92b9-fee781981482
 # ╠═ea2296cf-470c-47b9-90d0-ae4004fa77cf
 # ╠═eb2c5adc-8797-4e80-8a24-765966a4bb4a
 # ╠═a39ad855-7010-44cd-9d5c-a2aa23e14533
