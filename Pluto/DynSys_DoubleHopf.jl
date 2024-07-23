@@ -20,6 +20,28 @@ end
 # ╔═╡ 99d25fa8-8e58-4253-854d-eeaa877cd8ad
 u0 = [1.0, 0.0, 1.0, 0.0]
 
+# ╔═╡ 4bb8cffb-881c-4d02-bcac-cae8a4617985
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	c12 = 0.3
+	c21 = -0.3
+	dμ1 = 0.002
+	dμ2 = 0.002
+	k2 = 0.18
+	μ1list2 = 0.0:dμ1:0.4
+	μ2list2 = -0.4:dμ2:0.3
+	λs = zeros(length(μ2list2),length(μ1list2),4)
+	for (i1,μ1) in enumerate(μ1list2)
+		for (i2,μ2) in enumerate(μ2list2) 
+			pt = [μ1,μ2,0.1,k2,-0.2,c12,c21,-0.1]
+			doublehopf = ContinuousDynamicalSystem(dhopf,u0,pt)
+			λs[i2,i1,:] = lyapunovspectrum(doublehopf,10000;Ttr=1000)	
+		end
+	end
+end	
+  ╠═╡ =#
+
 # ╔═╡ 4aeac02b-54f6-4dd5-a19d-de4eb12e2db0
 # ╠═╡ disabled = true
 #=╠═╡
@@ -48,6 +70,21 @@ end
 save("lyapunov_spectrum_12.jld2","λs",λs,"μ1list",μ1list2,"μ2list",μ2list2)
   ╠═╡ =#
 
+# ╔═╡ f4f5c416-d469-44c9-9df1-b63973e87aca
+begin
+	s = load("lyapunov12.jld2")
+	λm = s["λm"]
+	μ1list = s["μ1list"]
+	μ2list = s["μ2list"]
+	s2 = load("lyapunov_spectrum_12.jld2")
+	λs = s2["λs"]
+	μ1list2 = s2["μ1list"]
+	μ2list2 = s2["μ2list"]
+	k2 = 0.18
+	c12 = 0.3
+	c21 = -0.3
+end	
+
 # ╔═╡ d1379a79-8493-4a73-95a1-44b32d1671ec
 ls = copy(λs);
 
@@ -65,11 +102,15 @@ for (i1,μ1) in enumerate(μ1list2)
 				μ1_min = ns2[2][findfirst(ns2[1] .< μ2)]
 				if μ1>μ1_min
 					ls[i2,i1,4] = 1
+				else	
+					ls[i2,i1,4] = 0
 				end
 			elseif μ2<0.2758
 				μ1_min = ns1[2][findfirst(ns1[1] .> μ2)]
 				if μ1>μ1_min
 					ls[i2,i1,4] = 1
+				else	
+					ls[i2,i1,4] = -1
 				end
 			end	
 		end
@@ -83,12 +124,19 @@ ns2[2][findfirst(ns2[1] .< -0.1)]
 
 # ╔═╡ 0d31c32d-560d-40d0-856a-99fbb45c54bc
 begin
-	#plt_all = 
-	plt_all = contourf(μ2list2,μ1list2,(ls[:,:,4]'.>0)*1+(ls[:,:,2]'.>-1e-3)*2+(ls[:,:,1]'.>1e-3)*3,lw=0,levels=2,c=[:white,:lightblue2,:pink],size=(1200,700),xlabel="μ2",ylabel="μ1",title="k1=0.1, k2=$(k2), σ=-0.2, c12=$(c12), c21=$(c21)",margin=5mm,colorbar=false)
-	plot!(ns1[1],ns1[2],c=:blue,lw=2,label="")
+	plt_all = contourf(μ2list2,μ1list2,-(ls[:,:,4]'.<0)*0.05+(ls[:,:,4]'.>0)*0.5+(ls[:,:,2]'.>-1e-3)*0.7+(ls[:,:,1]'.>1e-3)*1.1,lw=0,levels=[-0.1,-0.01,0.1,0.6,1.5,2.0],c=[:lavenderblush,:lightyellow,:lightblue1,:lightgray,:pink],size=(1000,700),xlabel="μ2",ylabel="μ1",title="k1=0.1, k2=$(k2), σ=-0.2, c12=$(c12), c21=$(c21)",margin=5mm,colorbar=false)
+	#plt_all = contourf(μ2list2,μ1list2,(ls[:,:,4]'.>0)*1,lw=0,levels=3,c=[:white,:lightgreen,:lightblue2,:pink],size=(1200,700),xlabel="μ2",ylabel="μ1",title="k1=0.1, k2=$(k2), σ=-0.2, c12=$(c12), c21=$(c21)",margin=5mm,colorbar=false)
+	plot!(Shape([0,0.3,0.3,0], [0,0,-0.1,-0.1]),c=:lavenderblush,lw=0,label="")
+	plot!(ns1[1],ns1[2],c=:blue,lw=2,label="NS")
 	plot!(ns2[1],ns2[2],c=:blue,lw=2,label="")
-	plot!([0,0],[-0.4,0.4],c=:black,lw=2,label="")
+	plot!([0,0],[-0.4,0.4],c=:black,lw=2,label="Hopf",legend=:bottomleft)
 	plot!([-0.4,0.4],[0,0],c=:black,lw=2,label="",xlims=(-0.4,0.3),ylims=(-0.1,0.4))
+	annotate!(0.15,0.05,text("oscillator 2",:purple,:center,20))
+	annotate!(-0.28,0.05,text("oscillator 1",:gold,:center,20))
+	annotate!(-0.1,0.15,text("quasiperiodic",:center,20))
+	annotate!(-0.1,0.35,text("periodic",:center,:blue,20))
+	annotate!(-0.24,0.38,text("chaotic",:red,:center,20))
+	scatter!([-0.15,-0.15,-0.15],[0.3,0.12,0.25],c=:black,ms=5,label="")
 	savefig(plt_all, "fig8.png")
 	plt_all
 end	
@@ -107,43 +155,6 @@ input[type*="range"] {
 }
 </style>
 """
-
-# ╔═╡ 4bb8cffb-881c-4d02-bcac-cae8a4617985
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	c12 = 0.3
-	c21 = -0.3
-	dμ1 = 0.002
-	dμ2 = 0.002
-	k2 = 0.18
-	μ1list2 = 0.0:dμ1:0.4
-	μ2list2 = -0.4:dμ2:0.3
-	λs = zeros(length(μ2list2),length(μ1list2),4)
-	for (i1,μ1) in enumerate(μ1list2)
-		for (i2,μ2) in enumerate(μ2list2) 
-			pt = [μ1,μ2,0.1,k2,-0.2,c12,c21,-0.1]
-			doublehopf = ContinuousDynamicalSystem(dhopf,u0,pt)
-			λs[i2,i1,:] = lyapunovspectrum(doublehopf,10000;Ttr=1000)	
-		end
-	end
-end	
-  ╠═╡ =#
-
-# ╔═╡ f4f5c416-d469-44c9-9df1-b63973e87aca
-begin
-	s = load("lyapunov12.jld2")
-	λm = s["λm"]
-	μ1list = s["μ1list"]
-	μ2list = s["μ2list"]
-	s2 = load("lyapunov_spectrum_12.jld2")
-	λs = s2["λs"]
-	μ1list2 = s2["μ1list"]
-	μ2list2 = s2["μ2list"]
-	k2 = 0.18
-	c12 = 0.3
-	c21 = -0.3
-end	
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """

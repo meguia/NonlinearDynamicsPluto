@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 9e372d70-f6af-11ee-10b3-2150e19c755b
-using DifferentialEquations, Plots, PlutoUI, DataInterpolations
+using DifferentialEquations, Plots, PlutoUI, WAV
 
 # ╔═╡ 8ed67206-fcd7-4734-888a-1e3ffd478671
 function simplest!(du,u,h,p,t)
@@ -32,113 +32,49 @@ tend : $(@bind tend Slider(10:10:1000.0,default=10.0;show_value=true))
 """
 
 # ╔═╡ 84f56f67-195e-40dd-a3ec-eb7a637b95f8
-# ╠═╡ disabled = true
-#=╠═╡
 h(p,t) = [x0]
-  ╠═╡ =#
 
 # ╔═╡ 345c8ea1-b23e-45af-b338-f0bf29910e2a
-#=╠═╡
 u0 = h([τ],0.)
-  ╠═╡ =#
 
 # ╔═╡ c758fbd7-cf8d-44e3-9a63-1f67b9cf3035
-#=╠═╡
 prob1 = DDEProblem(simplest!,u0,h,(0,tend),[τ]; constant_lags=[τ])
-  ╠═╡ =#
 
 # ╔═╡ b0f24865-4782-45eb-9c32-39ad97680007
-#=╠═╡
 sol1 = solve(prob1,alg = MethodOfSteps(Tsit5()));
-  ╠═╡ =#
 
 # ╔═╡ 26815c76-4c3c-4f2d-90f8-346fb6d420be
-#=╠═╡
 begin 
 	dτ = fτ*τ
 	plot(sol1(0:0.1:tend-2*dτ,idxs=1).u,sol1((0:0.1:tend-2*dτ) .+ dτ,idxs=1).u,sol1((0:0.1:tend-2*dτ) .+ 2*dτ,idxs=1).u,size=(600,600),xlims=(-1.5,1.5),ylims=(-1.5,1.5),zlims=(-1.5,1.5))
 end	
-  ╠═╡ =#
 
 # ╔═╡ 71ffaaf3-9dd5-46bf-b9c8-3424682e8e24
-#=╠═╡
 begin
 	plot(sol1,size=(1200,400))
 end
-  ╠═╡ =#
-
-# ╔═╡ 8605455a-c838-4cbc-b330-e7f65b308180
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	#secuencial;
-	tint = 1.7
-	nint = 40
-	dt = 0.1
-	local tini = 0.0
-	local u1 = [0.7]
-	local h1(p,t) = u1
-	prob = DDEProblem(simplest!,u1,h1,(0,nint*tint),[1.7]; constant_lags=[1.7])
-	sol = solve(prob,alg = MethodOfSteps(Tsit5()))
-	p1 = plot()
-	for n=1:nint
-		tspan = (tini,tini+tint)
-		rprob = remake(prob_ini; u0=u1, h=h1, tspan=tspan, saveat = dt)
-		soln = solve(rprob,alg = MethodOfSteps(Tsit5()))
-		h1(p,t) = LinearInterpolation(soln.u, soln.t,extrapolate=true)(t) 
-		plot!(p1,soln,label="")
-		tini += tint
-		u1 = soln.u[end]
-	end
-	plot!(sol,size=(1200,400))
-end	
-  ╠═╡ =#
-
-# ╔═╡ e3281a7c-c7b4-4f36-90c3-7154f008f245
-function blogs!(du,u,h,p,t)
-	p, rb, q, rm, k, τ2 = p
-	hs = h(p,t-τ2)[2]
-	du[1] = -p*u[1]+rb*hs
-	du[2] = -q*u[2]+rm*u[1]+k*u[2]*hs
-end
-
-# ╔═╡ 6d32ec4d-bbde-42fb-a98b-81c2aefab0cd
-function h2(p,t)
-	if t<0
-		return zeros(2)
-	else
-		return ones(2)
-	end	
-end
 
 # ╔═╡ 491ca0ca-8b5c-41df-9fc5-1f7ffc29d178
-
-
-# ╔═╡ 15aa3585-218f-4c7c-8989-604f174b2d74
-md"""
-τ : $(@bind τ2 Slider(0.0:0.1:50.0,default=0.1;show_value=true)) \
-p : $(@bind p Slider(0.0:0.01:2,default=0.1;show_value=true)) \
-q : $(@bind q Slider(0.0:0.01:2,default=0.1;show_value=true)) \
-rm : $(@bind rm Slider(0.0:0.01:2,default=0.1;show_value=true)) \
-rb : $(@bind rb Slider(0.0:0.01:2,default=0.1;show_value=true)) \
-k : $(@bind k Slider(-1.0:0.01:2.0,default=0.1;show_value=true)) \
-tfin : $(@bind tfin Slider(10:10:1000.0,default=10.0;show_value=true)) 
-"""
-
-# ╔═╡ e075764b-dbbe-44ec-a3c7-cdceb678b92d
-par = (p, rb, q, rm, k, τ2)
-
-# ╔═╡ 4f818ae5-98fd-4889-9af8-2009ec5753f1
-prob2 = DDEProblem(blogs!,h2,(0,tfin),par; constant_lags=[τ2]);
-
-# ╔═╡ 0ffe7920-a94a-434b-882b-a63b02b5f0d7
-sol2 = solve(prob2,alg = MethodOfSteps(Tsit5()));
-
-# ╔═╡ 1d1c6630-7c76-45c1-a48a-04b21e3cc286
-begin
-	plot(sol2,idxs=(0,1),size=(1200,400))
-	plot!(sol2,idxs=(0,2),size=(1200,400))
+function simplest_sliding!(du,u,h,p,t)
+	hs = h(p,t-u[2])[1]
+	du[1] = hs*(1.0-hs*hs) - 0.2*u[1]
+	du[2] = p[1]*u[2]*(3.37-u[2])
 end
+
+# ╔═╡ 8dc3904f-4274-43c8-a1cb-15e66e9f7941
+prob2 = DDEProblem(simplest_sliding!,[0.9;1.1],h,(0,3.5e4),[5e-5])
+
+# ╔═╡ fb27d939-f879-4c40-bd85-3112df1e19c0
+sol2 = solve(prob2,alg = MethodOfSteps(Tsit5());saveat=0.05);
+
+# ╔═╡ 5c6d0c45-b1ea-45e9-bd8a-81f01fef30b6
+# ╠═╡ disabled = true
+#=╠═╡
+plot(sol2,size=(1200,400))
+  ╠═╡ =#
+
+# ╔═╡ c3618037-428e-4acf-8543-0492902ea393
+wavwrite(getindex.(sol2.u,1)./2.0,"delayed4.wav"; Fs=48000, nbits=32)
 
 # ╔═╡ a0e34f60-e242-43af-87ae-17c9575ad1dc
 html"""
@@ -155,25 +91,25 @@ input[type*="range"] {
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+WAV = "8149f6b0-98f6-5db9-b78f-408fbbb8ef88"
 
 [compat]
-DataInterpolations = "~5.1.0"
 DifferentialEquations = "~7.13.0"
 Plots = "~1.40.4"
 PlutoUI = "~0.7.59"
+WAV = "~1.2.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "d155958a001804665b493eba6eb33de4ecbd7fe1"
+project_hash = "c8cb2874b6a2e89bc38e64dc2454da3e37cd3b9c"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "016833eb52ba2d6bea9fcb50ca295980e728ee24"
@@ -460,33 +396,10 @@ git-tree-sha1 = "fcbb72b032692610bfbdb15018ac16a36cf2e406"
 uuid = "adafc99b-e345-5852-983c-f28acb93d879"
 version = "0.3.1"
 
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
-
-[[deps.DataInterpolations]]
-deps = ["FindFirstFunctions", "ForwardDiff", "LinearAlgebra", "PrettyTables", "RecipesBase", "Reexport"]
-git-tree-sha1 = "ed7658bbf7cec98975d57737e80e4db2e01c7f03"
-uuid = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
-version = "5.1.0"
-
-    [deps.DataInterpolations.extensions]
-    DataInterpolationsChainRulesCoreExt = "ChainRulesCore"
-    DataInterpolationsOptimExt = "Optim"
-    DataInterpolationsRegularizationToolsExt = "RegularizationTools"
-    DataInterpolationsSymbolicsExt = "Symbolics"
-
-    [deps.DataInterpolations.weakdeps]
-    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-    Optim = "429524aa-4258-5aef-a3af-852621145aeb"
-    RegularizationTools = "29dad682-9a27-4bc3-9c72-016788665182"
-    Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -710,6 +623,12 @@ git-tree-sha1 = "cbf5edddb61a43669710cbc2241bc08b36d9e660"
 uuid = "29a986be-02c6-4525-aec4-84b980013641"
 version = "2.0.4"
 
+[[deps.FileIO]]
+deps = ["Pkg", "Requires", "UUIDs"]
+git-tree-sha1 = "82d8afa92ecf4b52d78d869f038ebfb881267322"
+uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+version = "1.16.3"
+
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
@@ -724,11 +643,6 @@ weakdeps = ["PDMats", "SparseArrays", "Statistics"]
     FillArraysPDMatsExt = "PDMats"
     FillArraysSparseArraysExt = "SparseArrays"
     FillArraysStatisticsExt = "Statistics"
-
-[[deps.FindFirstFunctions]]
-git-tree-sha1 = "e90fef90f7d75e6a5b435b0fd65609759f99717a"
-uuid = "64ca27bc-2ba2-4a57-88aa-44e436879224"
-version = "1.2.0"
 
 [[deps.FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "Setfield", "SparseArrays"]
@@ -1549,12 +1463,6 @@ git-tree-sha1 = "9306f6085165d270f7e3db02af26a400d580f5c6"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.3"
 
-[[deps.PrettyTables]]
-deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "66b20dd35966a748321d3b2537c4584cf40387c7"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.3.2"
-
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -1922,12 +1830,6 @@ git-tree-sha1 = "25349bf8f63aa36acbff5e3550a86e9f5b0ef682"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
 version = "0.5.6"
 
-[[deps.StringManipulation]]
-deps = ["PrecompileTools"]
-git-tree-sha1 = "a04cabe79c5f01f4d723cc6704070ada0b9d46d5"
-uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.4"
-
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
@@ -2087,6 +1989,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Wayland_jll", "Xorg_libX11_jll", "
 git-tree-sha1 = "2f0486047a07670caad3a81a075d2e518acc5c59"
 uuid = "a44049a8-05dd-5a78-86c9-5fde0876e88c"
 version = "1.3.243+0"
+
+[[deps.WAV]]
+deps = ["Base64", "FileIO", "Libdl", "Logging"]
+git-tree-sha1 = "7e7e1b4686995aaf4ecaaf52f6cd824fa6bd6aa5"
+uuid = "8149f6b0-98f6-5db9-b78f-408fbbb8ef88"
+version = "1.2.0"
 
 [[deps.Wayland_jll]]
 deps = ["Artifacts", "EpollShim_jll", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]
@@ -2389,15 +2297,11 @@ version = "1.4.1+1"
 # ╠═26815c76-4c3c-4f2d-90f8-346fb6d420be
 # ╠═79d7524f-2c31-4ca7-a535-9918dc2af385
 # ╠═71ffaaf3-9dd5-46bf-b9c8-3424682e8e24
-# ╠═8605455a-c838-4cbc-b330-e7f65b308180
-# ╠═e3281a7c-c7b4-4f36-90c3-7154f008f245
-# ╠═6d32ec4d-bbde-42fb-a98b-81c2aefab0cd
 # ╠═491ca0ca-8b5c-41df-9fc5-1f7ffc29d178
-# ╟─15aa3585-218f-4c7c-8989-604f174b2d74
-# ╠═e075764b-dbbe-44ec-a3c7-cdceb678b92d
-# ╠═4f818ae5-98fd-4889-9af8-2009ec5753f1
-# ╠═0ffe7920-a94a-434b-882b-a63b02b5f0d7
-# ╠═1d1c6630-7c76-45c1-a48a-04b21e3cc286
-# ╟─a0e34f60-e242-43af-87ae-17c9575ad1dc
+# ╠═8dc3904f-4274-43c8-a1cb-15e66e9f7941
+# ╠═fb27d939-f879-4c40-bd85-3112df1e19c0
+# ╠═5c6d0c45-b1ea-45e9-bd8a-81f01fef30b6
+# ╠═c3618037-428e-4acf-8543-0492902ea393
+# ╠═a0e34f60-e242-43af-87ae-17c9575ad1dc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

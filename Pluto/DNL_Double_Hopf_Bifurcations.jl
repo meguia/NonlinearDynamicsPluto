@@ -32,7 +32,7 @@ function dhopf(u,p)
 end
 
 # ╔═╡ d9c3004c-3d87-4912-b05f-17130e6e1394
-par_d = (μ1=-0.4,μ2=-0.4,k1=0.1,k2=0.18,σ2=0.2,c12=0.3,c21=-0.1,ξ=-0.1)
+par_d = (μ1=-0.4,μ2=-0.4,k1=0.1,k2=0.18,σ2=-0.2,c12=0.3,c21=-0.3,ξ=-0.1)
 
 # ╔═╡ 84aff82e-42db-486f-8081-8ac718f54a1d
 prob2 = BifurcationProblem(dhopf, [0.1; 0.0; 0.1; 0.0], par_d, (@lens _.μ1),record_from_solution = (x, p) -> x[1]);
@@ -75,7 +75,7 @@ begin
 	plot!(hopf_1b,vars=(:μ2,:μ1),branchlabel = "Hopf 2",plotspecialpoints = false,c=:black,ls=:dash)
 	scatter!([0],[0],label="Hopf-Hopf",c=:gray)
 	plot!(ns_po1,branchlabel = "NS 1",vars=(:μ2,:μ1),c=:red,ls=:dot,plotspecialpoints = false)
-	plot!(ns_po2,branchlabel = "NS 2",vars=(:μ1,:μ2),c=:red,ls=:dot,plotspecialpoints = false,ylims=(-0.4,0.4),xlims=(-0.4,0.4))
+	plot!(ns_po2,branchlabel = "NS 2",vars=(:μ2,:μ1),c=:red,ls=:dot,plotspecialpoints = false,ylims=(-0.4,0.4),xlims=(-0.4,0.4))
 	scatter!([-0.3],[0.3],label="P2",c=:red,title="k₁=0.1, k₂=$(par_d.k2), σ=$(par_d.σ2), c₁₂=$(par_d.c12), c₂₁=$(par_d.c21) ")
 end	
 
@@ -94,14 +94,6 @@ end
 
 # ╔═╡ a90f40e4-598c-40f9-87ca-c687db8b60c5
 save("ns12.jld2","ns1",[ns_po1.μ2,ns_po1.μ1],"ns2",[ns_po2.μ2,ns_po2.μ1])
-
-# ╔═╡ d176c4c0-8d96-49fd-a1d8-d58598cb3be4
-begin
-	df= DataFrame(x=ns_po2.μ2,y=ns_po2.μ1)
-	model = lm(@formula(y ~ x + x^2 ), df)  # Note how the formula looks exactly like the model you want to build
-	#scatter(df.x,df.y)
-	#plot!(df.x, predict(model, df), label="model")
-end	
 
 # ╔═╡ 66d4a4d6-bf9b-4069-9110-d30e17f34871
 # ╠═╡ disabled = true
@@ -2545,7 +2537,6 @@ version = "1.4.1+1"
 # ╠═eb2c5adc-8797-4e80-8a24-765966a4bb4a
 # ╠═a39ad855-7010-44cd-9d5c-a2aa23e14533
 # ╠═a90f40e4-598c-40f9-87ca-c687db8b60c5
-# ╠═d176c4c0-8d96-49fd-a1d8-d58598cb3be4
 # ╠═66d4a4d6-bf9b-4069-9110-d30e17f34871
 # ╠═b8371c16-3666-489c-8c63-a36cf6e74096
 # ╠═881c4dbe-e059-476e-9cda-ba1db682ad51
