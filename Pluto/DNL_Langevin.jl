@@ -4,109 +4,62 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
+# ╔═╡ 344a47a0-4e78-11ef-2a69-39c5162ab3a1
+using DifferentialEquations, Plots, StatsBase
+
+# ╔═╡ 971ed7fe-54a9-465c-80eb-861799c977a0
+using DifferentialEquations.EnsembleAnalysis
+
+# ╔═╡ 19bcd029-97b6-4f77-aee5-062bf13f7f79
+function drift!(du, u, p, t)
+	du[1] = -p[1]*u[1]
 end
 
-# ╔═╡ f63e74a0-4034-11ef-3dd0-cfb0ac662504
-using DifferentialEquations, Plots, LinearAlgebra, PlutoUI
-
-# ╔═╡ c93de7ce-5c89-408b-85a4-81030c874705
-function bsong(du,u,h,p,t)
-	(Ch,MG,MB,RB,Rh,TT,r,ν,α,β,γ,T) = p
-	(i1,Ω,i3,P0,Pi,x,y) = u
-	hist1 = h(p, t - T)[5]
-	hist2 = h(p, t - T/2.0)[5]
-	du[1] = Ω
-	du[2] = -(1/Ch/MG)*i1-Rh*(1/MB+1/MG)*Ω+(1/MG/Ch+Rh*RB/MG/MB)*i3+(Rh*RB/MG/MB)*P0+(1/MG)*du[4]
-	du[3] = -(MG/MB)*Ω-(Rh/MB)*i3+(1/MB)*P0
-	du[4] = (1-r)*hist2-P0 # for P0
-	du[5] = ν*y-r*hist1-Pi # for Pi
-	du[6] = y
-	du[7] = (-α-β*x-x^3+x^2)*γ^2 -(x+1.0)*γ*x*y
-	du
+# ╔═╡ 82e151fd-ffde-4774-bb6f-ceaa5b6c96e9
+function noise!(du,u,p,t)
+	du[1] = p[2]
 end
 
-# ╔═╡ db67cd4e-fc91-4ace-858b-df22068f11a1
+# ╔═╡ a5e1bf26-c942-41de-9c1c-2b61e52ae252
 begin
-	M= one(zeros(7,7))
-	M[4,4] = 0.0
-	M[5,5] = 0.0
-end;
+	#Langevin process with mass = 1
+	kT = 0.01
+	γ = 0.002
+	p = [γ,sqrt(2*γ*kT)]
+	tfin = 1000
+end	
 
-# ╔═╡ 6900f848-1890-4d77-ba0c-ed279c173867
-bsongmm! = DDEFunction(bsong, mass_matrix = M)
+# ╔═╡ 07b83917-db23-469c-a67b-4440905c3601
+prob1 = SDEProblem(drift!,noise!,[0.0],tfin,p)
 
-# ╔═╡ f2ebc8cf-49bf-42d9-b245-6f8dfc17115e
-md"""
-α $(@bind α Slider(0.0:0.01:0.5,default=0.05;show_value=true)) \
-β $(@bind β Slider(0.0:0.01:1.5,default=0.05;show_value=true)) \
-TT $(@bind TT Slider(0.0:0.01:1.0,default=1.0;show_value=true)) \
-ν $(@bind ν Slider(0.0:0.0001:0.01,default=0.001;show_value=true)) \
-tend : $(@bind tend Slider(0.0:0.001:0.05,default=0.01;show_value=true)) 
-"""
+# ╔═╡ 3c7fe589-d045-4727-9074-07b5963582b7
+ensemble1 = EnsembleProblem(prob1)
 
-# ╔═╡ ca89ed2f-ff29-4f5b-9a0f-989d6efc1922
+# ╔═╡ 7bb61ff3-bed2-4969-adc6-1c834798785b
+sol = solve(ensemble1, EnsembleThreads(), trajectories = 4000)
+
+# ╔═╡ 11f49f72-ed07-4625-9387-7e53bc5b1b21
 begin
-	Ch = 1.43E-10
-    MG = 0.001
-	MB = 1E4
-	RB = 5E6
-	Rh = 2.4E4
-	r = 0.65
-	γ = 23500.0
-	L = 0.025
-	c = 343
-	T = 2*L/c
-	p = (Ch,MG,MB,RB,Rh,TT,r,ν,α,β,γ,T)
-	tspan = (0.0, tend)
-	u0 = [0.0,0.0,0.0,0.0,0.0,0.1,0.0]
-	h(p, t) = zeros(7)
-end;
+	summ = EnsembleSummary(sol, 0:tfin/100:tfin)
+	plot(summ, labels = "Middle 95%")
+	summ = EnsembleSummary(sol, 0:tfin/100:tfin; quantiles = [0.25, 0.75])
+	plot!(summ, labels = "Middle 50%", legend = true)
+end	
 
-# ╔═╡ e0f4a679-d598-4cb5-8c8d-faa5c75e12df
-prob = DDEProblem(bsongmm!, u0, h, tspan, p);
-
-# ╔═╡ a0d0982a-a594-43e2-a0dd-92a2ef15816d
-sol = solve(prob, MethodOfSteps(Rodas5P()));
-
-# ╔═╡ 63860fac-7b87-4ef8-adbf-9ea186bc699b
-begin
-	p1 = plot(sol,idxs=(0,2))
-	p2 = plot(sol,idxs=(0,4))
-	plot(p1,p2,layout=(1,2),size=(1000,500))
-end
-
-# ╔═╡ 9ccca25a-fe8b-4978-84c7-e5aa4dcbb0d1
-html"""
-<style>
-main {
-    max-width: 700px;
-}
-input[type*="range"] {
-	width: 90%;
-}
-</style>
-"""
+# ╔═╡ 37352852-14d4-4d9e-9db6-a6668059a150
+timepoint_meanvar(sol, tfin) 
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 DifferentialEquations = "~7.13.0"
 Plots = "~1.40.5"
-PlutoUI = "~0.7.59"
+StatsBase = "~0.34.3"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -115,23 +68,17 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "5adec4527e4055a1035d1bd6102fa8b481c4911a"
+project_hash = "07b0ce4ceb875ddd88dec68a47faa6023680bc14"
 
 [[deps.ADTypes]]
-git-tree-sha1 = "878aee357e230c375cc531952933889cbf9e9314"
+git-tree-sha1 = "aa4d425271a914d8c4af6ad9fccb6eb3aec662c7"
 uuid = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
-version = "1.6.0"
+version = "1.6.1"
 weakdeps = ["ChainRulesCore", "EnzymeCore"]
 
     [deps.ADTypes.extensions]
     ADTypesChainRulesCoreExt = "ChainRulesCore"
     ADTypesEnzymeCoreExt = "EnzymeCore"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.3.2"
 
 [[deps.Accessors]]
 deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "LinearAlgebra", "MacroTools", "Markdown", "Test"]
@@ -849,24 +796,6 @@ git-tree-sha1 = "f218fe3736ddf977e0e772bc9a586b2383da2685"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.23"
 
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.5"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.5"
-
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
 uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
@@ -1188,11 +1117,6 @@ weakdeps = ["ChainRulesCore", "ForwardDiff", "SpecialFunctions"]
     ForwardDiffExt = ["ChainRulesCore", "ForwardDiff"]
     SpecialFunctionsExt = "SpecialFunctions"
 
-[[deps.MIMEs]]
-git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
-uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
-version = "0.1.4"
-
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
 git-tree-sha1 = "f046ccd0c6db2832a9f639e2c669c6fe867e5f4f"
@@ -1466,12 +1390,6 @@ version = "1.40.5"
     IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
     ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "ab55ee1510ad2af0ff674dbcced5e94921f867a9"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.59"
 
 [[deps.PoissonRandom]]
 deps = ["Random"]
@@ -2013,9 +1931,9 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "dd260903fdabea27d9b6021689b3cd5401a57748"
+git-tree-sha1 = "d95fe458f26209c66a187b1114df96fd70839efd"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.20.0"
+version = "1.21.0"
 weakdeps = ["ConstructionBase", "InverseFunctions"]
 
     [deps.Unitful.extensions]
@@ -2343,15 +2261,15 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╠═f63e74a0-4034-11ef-3dd0-cfb0ac662504
-# ╠═c93de7ce-5c89-408b-85a4-81030c874705
-# ╠═db67cd4e-fc91-4ace-858b-df22068f11a1
-# ╠═6900f848-1890-4d77-ba0c-ed279c173867
-# ╠═ca89ed2f-ff29-4f5b-9a0f-989d6efc1922
-# ╠═e0f4a679-d598-4cb5-8c8d-faa5c75e12df
-# ╠═a0d0982a-a594-43e2-a0dd-92a2ef15816d
-# ╟─63860fac-7b87-4ef8-adbf-9ea186bc699b
-# ╠═f2ebc8cf-49bf-42d9-b245-6f8dfc17115e
-# ╠═9ccca25a-fe8b-4978-84c7-e5aa4dcbb0d1
+# ╠═344a47a0-4e78-11ef-2a69-39c5162ab3a1
+# ╠═19bcd029-97b6-4f77-aee5-062bf13f7f79
+# ╠═82e151fd-ffde-4774-bb6f-ceaa5b6c96e9
+# ╠═a5e1bf26-c942-41de-9c1c-2b61e52ae252
+# ╠═07b83917-db23-469c-a67b-4440905c3601
+# ╠═3c7fe589-d045-4727-9074-07b5963582b7
+# ╠═7bb61ff3-bed2-4969-adc6-1c834798785b
+# ╠═11f49f72-ed07-4625-9387-7e53bc5b1b21
+# ╠═971ed7fe-54a9-465c-80eb-861799c977a0
+# ╠═37352852-14d4-4d9e-9db6-a6668059a150
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

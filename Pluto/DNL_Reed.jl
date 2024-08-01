@@ -140,11 +140,6 @@ k : $(@bind k_vreed Slider(0.1:0.01:3.0,default=-0.1;show_value=true)) \
 tmax : $(@bind tmax_vreed Slider(10:10:300.0,default=10.0;show_value=true)) 
 """
 
-# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
-#=╠═╡
-2*pi/sqrt(k)
-  ╠═╡ =#
-
 # ╔═╡ 1dc81c7c-514a-4af0-a3c2-452ee9f71fd3
 begin
 	#esto es para generar la figura del paper
@@ -165,6 +160,9 @@ begin
 	savefig(plt_all, "fig2.png")
 	plt_all
 end	
+
+# ╔═╡ bb1af7f6-58f2-4c86-b47d-987f6bfadb9c
+2*pi/sqrt(k)
 
 # ╔═╡ b36ca100-7566-4ef6-a93c-49a6796e19c1
 findmin(abs.(knotes .- k))[2]
