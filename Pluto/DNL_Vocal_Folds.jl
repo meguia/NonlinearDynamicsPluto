@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -22,9 +22,9 @@ alg = Tsit5()
 
 # ╔═╡ c3676610-97e6-417a-bbbb-ffb49c233559
 function vfolds!(du,u,p,t)
-	(μ,k,f,σ) = p
+	(μ,k,f) = p
 	du[1] = u[2]
-	du[2] = μ*u[2]-σ*u[1]^2*u[2]-k*u[1]-f
+	du[2] = -(k+0.1*μ*(k+1))*u[1]+μ*u[2]-u[1]^2*u[2]-f
 end
 
 # ╔═╡ c0af1a99-7acf-4f05-8c98-52c3f898391d
@@ -34,12 +34,11 @@ y0 $(@bind y0 Slider(-1.0:0.1:1.0,default=0.1;show_value=true)) \
 μ : $(@bind μ Slider(-0.1:0.01:5.0,default=-0.1;show_value=true)) \
 k : $(@bind k Slider(0.01:0.01:5.0,default=0.1;show_value=true)) \
 f : $(@bind f Slider(0.0:0.01:5.0,default=0.0;show_value=true)) \
-σ : $(@bind σ Slider(0.0:0.01:3.0,default=0.0;show_value=true)) \
 tmax : $(@bind tmax Slider(10:10:300.0,default=10.0;show_value=true)) 
 """
 
 # ╔═╡ 44a183b0-af44-4ceb-b0d7-d4e8ac0b2563
-par = [ μ, k, f, σ]
+par = [ μ, k, f]
 
 # ╔═╡ 79c41ee1-2d22-4f58-9dbb-bdb0539d7bed
 par
