@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.20.0
 
 using Markdown
 using InteractiveUtils
@@ -73,7 +73,7 @@ begin
 	scatter!(pltb,[0],[-0.11],ms=4,c=:blue,label="η=0")
 	scatter!(pltb,[0],[-0.145],ms=4,c=:red,label="η=0.02",xlims=(-0.4,0.3),ylims=(-0.3,0.05))
 	plt_ab = plot(pltb,plta,layout=(1,2),size=(1200,500))
-	savefig(plt_ab, "fig6.png")
+	savefig(plt_ab, "fig6.svg")
 	plt_ab
 end	
 
@@ -108,7 +108,7 @@ begin
 	plt3a = plot(sol3, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=-0.005, μ2=-0.3, δ=1.5",margin=3mm)
 	plt3b = plot(sol3, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plt_all = plot(plt1a,plt2a,plt3a,plt1b,plt2b,plt3b,layout=(2,3),size=(1200,700))
-	savefig(plt_all, "fig4.png")
+	savefig(plt_all, "fig4.svg")
 	plt_all
 end	
 
@@ -128,7 +128,7 @@ begin
 	plt6a = plot(sol6, idxs=(0,2),label="",ylabel="y",lc=:black,grid=false, title="μ1=0.005, μ2=-0.3, δ=1.5",margin=3mm)
 	plt6b = plot(sol6, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plt_all2 = plot(plt4a,plt5a,plt6a,plt4b,plt5b,plt6b,layout=(2,3),size=(1200,700))
-	savefig(plt_all2, "fig5.png")
+	savefig(plt_all2, "fig5.svg")
 	plt_all2
 end	
 

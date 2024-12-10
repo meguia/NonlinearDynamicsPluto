@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.20.0
 
 using Markdown
 using InteractiveUtils
@@ -157,7 +157,7 @@ begin
 	plt3a = plot(sol3, idxs = (0,2),label="",ylabel="y",lc=:black,grid=false, title="μ=$μ, v₀=$v0",margin=3mm)
 	plt3b = plot(sol3, idxs = (1,2),label="",xlabel="x",ylabel="y",lc=:black,grid=false,margin=3mm)
 	plt_all = plot(plt1a,plt2a,plt3a,plt1b,plt2b,plt3b,layout=(2,3),size=(1200,700))
-	savefig(plt_all, "fig2.png")
+	savefig(plt_all, "fig2.svg")
 	plt_all
 end	
 
@@ -232,7 +232,7 @@ begin
 	annotate!(0, 0,text("A","Times",14,:left,:bottom))
 	
 	fig3 = plot(f3a,f3b,f3c,f3d,layout=(2,2),size=(1200,1000))
-	savefig(fig3, "fig3.png")
+	savefig(fig3, "fig3.svg")
 	fig3
 end	
 

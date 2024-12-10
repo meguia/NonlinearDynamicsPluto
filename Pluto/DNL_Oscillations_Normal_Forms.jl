@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -41,12 +41,14 @@ begin
 	plot!(plt1,sol1a,idxs=(1,2),c=:black,arrow=true,lw=1)
 	plot!(plt1,sol1b,idxs=(1,2),c=:black,arrow=false,lw=1)
 	plot!(plt1,xlabel="",ylabel="",border=:none)
+	annotate!(plt1,-1, 1, text("a)", :black,:24))
 	plt2 = scatter([0],[0],color=:white,xlims=xlims,ylims=ylims,legend=false)
 	plot!(plt2,sol2a,idxs=(1,2),c=:black,arrow=true,lw=1)
 	plot!(plt2,sol2b,idxs=(1,2),c=:black,arrow=true,lw=1)
 	plot!(plt2,sol2c,idxs=(1,2),c=:black,arrow=true,lw=1)
 	plot!(plt2,sol2d,idxs=(1,2),c=:black,arrow=true,lw=3)
 	plot!(plt2,xlabel="",ylabel="",border=:none)
+	annotate!(plt2,-1, 1, text("b)", :black,:24))
 	plt = plot(plt1,plt2,layout = (1, 2),size=(900,300))
 	#savefig(plt, "fig1.eps")
 end	
@@ -92,11 +94,13 @@ begin
 	plot!(plt3,sol3e,idxs=(polar2xy,1,2),c=:black,arrow=true,lw=1)
 	annotate!(plt3,nodo[1]+0.15,nodo[2], text("N", :black, 20))
 	annotate!(plt3,nodo[1]+0.1,-nodo[2]+0.1, text("S", :black, 20))
+	annotate!(plt3,-1.5, 1.1, text("c)", :black,:24))
 	plot!(plt3,border=:none)
 	plt4=scatter([0],[0],color=:white,xlims=(-1.5,1.5),ylims=(-1.1,1.1),legend=false)
 	plot!(plt4,sol4a,idxs=(polar2xy,1,2),c=:black,arrow=true,lw=1)
 	plot!(plt4,sol4b,idxs=(polar2xy,1,2),c=:black,arrow=true,lw=1)
 	plot!(plt4,sol4c,idxs=(polar2xy,1,2),c=:black,arrow=true,lw=3)
+	annotate!(plt4,-1.5, 1.1,text("d)", :black,:24))
 	#plot!(plt4,sol4d,idxs=(polar2xy,1,2),c=:black,arrow=true,ls=:dash,lw=1)
 	plot!(plt4,border=:none)
 	plt_new = plot(plt3,plt4,layout = (1, 2),size=(900,300))
@@ -132,6 +136,7 @@ begin
 	plot!(plt5,sol5b,idxs=(1,2),c=:black,arrow=true,lw=1)
 	plot!(plt5,sol5c,idxs=(1,2),c=:black,arrow=true,lw=1)
 	annotate!(plt5,0,0.11, text("S", :black, 20))
+	annotate!(plt5,-0.3, 0.7, text("e)", :black,:24))
 	plot!(plt5,border=:none)
 	plt6=scatter([1],[0],color=:white,xlims=(-0.3,1.7),ylims=(-0.8,0.8),legend=false)
 	scatter!(plt6,[0],[0],color=:white)
@@ -139,6 +144,7 @@ begin
 	plot!(plt6,sol6b,idxs=(1,2),c=:black,arrow=true,lw=1)
 	plot!(plt6,sol6c,idxs=(1,2),c=:black,arrow=true,lw=3)
 	annotate!(plt6,0,0.11, text("S", :black, 20))
+	annotate!(plt6,-0.3, 0.7, text("f)", :black,:24))
 	plot!(plt6,border=:none)
 	plt_new2 = plot(plt5,plt6,layout = (1, 2),size=(900,300))
 end	
@@ -146,7 +152,7 @@ end
 # ╔═╡ ceef1065-3696-4c5e-ba28-f68a5e76612f
 begin
 	plt_all = plot(plt1,plt2,plt3,plt4,plt5,plt6,layout=(3,2),size=(1200,1200))
-	savefig(plt_all, "fig1.png")
+	savefig(plt_all, "fig1.svg")
 	plt_all
 end
 	
@@ -178,7 +184,7 @@ Plots = "~1.40.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "46197015d3eaa0ead627826c1cf7e5f7ed62c9de"
 

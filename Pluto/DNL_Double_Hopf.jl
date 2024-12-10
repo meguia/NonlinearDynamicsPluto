@@ -82,7 +82,7 @@ begin
 	p3c = plot(solc,idxs=(1,2),arrow=true,c=:black,label="(x₁,y₁)")
 	plot!(p3c,solc,idxs=(3,4),arrow=true,c=:blue,label="(x₂,y₂)",xlabel="x",ylabel="y",margin=5mm)
 	plt_all = plot(p2a,p2b,p2c,p3a,p3b,p3c,layout=(2,3),size = (1200,800))
-	savefig(plt_all, "fig7.png")
+	savefig(plt_all, "fig7.svg")
 	plt_all
 end	
 
